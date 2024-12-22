@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "151995107413",
+    "project_id": "tiketpesawat-99dc8",
+    "storage_bucket": "tiketpesawat-99dc8.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:151995107413:android:c96fa33f90502bc9756cdc",
+        "android_client_info": {
+          "package_name": "com.example.uas_tiketpesawat"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAK3guRZ-iGs2wKgLpPrjtuTwll6Q1l3zc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
