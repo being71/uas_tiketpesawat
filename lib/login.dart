@@ -2,6 +2,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'firestore.dart';
+import 'home.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -35,12 +36,36 @@ class LoginPageState extends State<LoginPage> {
         bool userExists = await FirestoreService().isUserExists(user.uid);
 
         if (userExists) {
-          /*Navigator.pushAndRemoveUntil(
-             ignore: use_build_context_synchronously
-            context,
-            MaterialPageRoute(builder: (context) => const HomeScreen()),
-            (Route<dynamic> route) => false,
-          ); */
+          // Ambil data user dari Firestore
+          var userData = await FirestoreService().getUserData(user.uid);
+          String status = userData['status']; // Field status di Firestore
+
+          if (status == 'user') {
+            // Navigasi ke HomeScreen
+            if (mounted) {
+              Navigator.pushAndRemoveUntil(
+                context,
+                MaterialPageRoute(
+                    builder: (context) => const HomePage(
+                          userId: 'user.uid',
+                        )),
+                (Route<dynamic> route) => false,
+              );
+            }
+          } else if (status == 'admin') {
+            // Navigasi ke HomeAdminScreen
+            if (mounted) {
+              /*Navigator.pushAndRemoveUntil(
+              context,
+              MaterialPageRoute(builder: (context) => const HomeAdminPage()),
+              (Route<dynamic> route) => false,
+            );*/
+            }
+          } else {
+            setState(() {
+              _errorMessage = 'Status pengguna tidak valid.';
+            });
+          }
         } else {
           setState(() {
             _errorMessage = 'Pengguna tidak ditemukan di Firestore.';

@@ -26,4 +26,20 @@ class FirestoreService {
       throw Exception("Gagal memeriksa data pengguna: $e");
     }
   }
+
+  // Fungsi untuk mengambil data pengguna dari Firestore
+  Future<Map<String, dynamic>> getUserData(String userId) async {
+    try {
+      DocumentSnapshot userDoc =
+          await firestore.collection('users').doc(userId).get();
+
+      if (userDoc.exists) {
+        return userDoc.data() as Map<String, dynamic>;
+      } else {
+        throw Exception('Pengguna tidak ditemukan di Firestore.');
+      }
+    } catch (e) {
+      throw Exception("Gagal mengambil data pengguna: $e");
+    }
+  }
 }
