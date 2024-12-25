@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:uas_tiketpesawat/add_tiket_page.dart';
 import 'package:uas_tiketpesawat/Ticket_Detail_Page.dart';
 
 class TicketListPage extends StatelessWidget {
@@ -11,6 +12,18 @@ class TicketListPage extends StatelessWidget {
       appBar: AppBar(
         title: const Text('Daftar Tiket'),
         centerTitle: true,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.add),
+            onPressed: () {
+              // Navigasi ke halaman tambah tiket
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => TicketPage()),
+              );
+            },
+          ),
+        ],
       ),
       body: StreamBuilder<QuerySnapshot>(
         stream: FirebaseFirestore.instance
@@ -33,8 +46,7 @@ class TicketListPage extends StatelessWidget {
             itemCount: tickets.length,
             itemBuilder: (context, index) {
               final ticket = tickets[index];
-              return _buildTicketCard(
-                  context, ticket); // Berikan context ke _buildTicketCard
+              return _buildTicketCard(context, ticket);
             },
           );
         },
@@ -65,8 +77,7 @@ class TicketListPage extends StatelessWidget {
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
                     ),
-                    overflow: TextOverflow
-                        .ellipsis, // Potong teks jika terlalu panjang
+                    overflow: TextOverflow.ellipsis,
                     maxLines: 1,
                   ),
                 ),
@@ -80,7 +91,6 @@ class TicketListPage extends StatelessWidget {
                 ),
               ],
             ),
-
             const SizedBox(height: 8),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,

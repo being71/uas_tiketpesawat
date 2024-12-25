@@ -7,6 +7,23 @@ class TicketDetailPage extends StatelessWidget {
 
   const TicketDetailPage({Key? key, required this.ticketId}) : super(key: key);
 
+  Future<void> _deleteTicket(BuildContext context) async {
+    try {
+      await FirebaseFirestore.instance
+          .collection('tickets')
+          .doc(ticketId)
+          .delete();
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Tiket berhasil dihapus')),
+      );
+      Navigator.pop(context); // Kembali ke halaman sebelumnya
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Gagal menghapus tiket: $e')),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -90,7 +107,6 @@ class TicketDetailPage extends StatelessWidget {
                 ElevatedButton(
                   onPressed: () {
                     // Aksi untuk mengedit tiket
-                    // Misalnya, navigasi ke halaman edit tiket
                     Navigator.push(
                       context,
                       MaterialPageRoute(
@@ -100,6 +116,37 @@ class TicketDetailPage extends StatelessWidget {
                     );
                   },
                   child: const Text('Edit Tiket'),
+                ),
+                const SizedBox(height: 8),
+                ElevatedButton(
+                  onPressed: () async {
+                    final confirm = await showDialog<bool>(
+                      context: context,
+                      builder: (context) => AlertDialog(
+                        title: const Text('Konfirmasi'),
+                        content: const Text(
+                            'Apakah Anda yakin ingin menghapus tiket ini?'),
+                        actions: [
+                          TextButton(
+                            onPressed: () => Navigator.pop(context, false),
+                            child: const Text('Batal'),
+                          ),
+                          TextButton(
+                            onPressed: () => Navigator.pop(context, true),
+                            child: const Text('Hapus'),
+                          ),
+                        ],
+                      ),
+                    );
+
+                    if (confirm == true) {
+                      _deleteTicket(context);
+                    }
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.red,
+                  ),
+                  child: const Text('Hapus Tiket'),
                 ),
               ],
             ),
