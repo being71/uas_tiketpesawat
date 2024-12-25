@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:intl/intl.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:uas_tiketpesawat/login.dart';
 import 'package:uas_tiketpesawat/ticket_list_page.dart';
 import 'package:uas_tiketpesawat/user_list.dart';
 import 'ticket_detail_page.dart';
@@ -21,12 +24,52 @@ class _HomeScreenAdminState extends State<HomeScreenAdmin> {
     return snapshot.docs.length;
   }
 
+  // Helper function to format the timestamp fields
+  String _formatTimestamp(dynamic timestamp) {
+    if (timestamp is Timestamp) {
+      return DateFormat('MMMM dd, yyyy').format(timestamp.toDate());
+    } else if (timestamp is String) {
+      try {
+        DateTime dateTime =
+            DateTime.parse(timestamp); // Try parsing String to DateTime
+        return DateFormat('MMMM dd, yyyy').format(dateTime);
+      } catch (e) {
+        return "Invalid date"; // Fallback if parsing fails
+      }
+    }
+    return "Invalid date"; // Return a fallback if the type doesn't match
+  }
+
+  // Function to handle logout
+  Future<void> _logout() async {
+    try {
+      // Sign out from Firebase Auth
+      await FirebaseAuth.instance.signOut();
+
+      // Navigate to LoginPage and replace the current screen
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+            builder: (context) =>
+                LoginPage()), // Ensure LoginPage is correctly imported
+      );
+    } catch (e) {
+      print("Logout failed: $e");
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Dashboard Admin'),
         centerTitle: true,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.logout),
+            onPressed: _logout, // Call logout function when pressed
+          ),
+        ],
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -247,7 +290,7 @@ class _HomeScreenAdminState extends State<HomeScreenAdmin> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  "Tanggal: ${ticket['date']}",
+                  "Tanggal: ${_formatTimestamp(ticket['date'])}", // Formatted date
                   style: const TextStyle(fontSize: 14),
                 ),
                 Text(

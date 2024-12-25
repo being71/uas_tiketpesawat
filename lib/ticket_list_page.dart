@@ -1,10 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:intl/intl.dart'; // Import the intl package
 import 'package:uas_tiketpesawat/add_tiket_page.dart';
 import 'package:uas_tiketpesawat/Ticket_Detail_Page.dart';
+import 'package:uas_tiketpesawat/home_screen_admin.dart';
+import 'package:uas_tiketpesawat/user_list.dart'; // If you have a UserListPage
 
-class TicketListPage extends StatelessWidget {
+class TicketListPage extends StatefulWidget {
   const TicketListPage({Key? key}) : super(key: key);
+
+  @override
+  _TicketListPageState createState() => _TicketListPageState();
+}
+
+class _TicketListPageState extends State<TicketListPage> {
+  int _currentIndex = 1; // Set initial index to 1 since we're on TicketListPage
 
   @override
   Widget build(BuildContext context) {
@@ -51,10 +61,77 @@ class TicketListPage extends StatelessWidget {
           );
         },
       ),
+      bottomNavigationBar: BottomNavigationBar(
+        currentIndex: _currentIndex,
+        onTap: (index) {
+          setState(() {
+            _currentIndex = index;
+          });
+
+          // Navigation logic based on selected index
+          switch (index) {
+            case 0:
+              // Navigate to Home screen
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                    builder: (context) => const HomeScreenAdmin()),
+              );
+              break;
+            case 1:
+              // Stay on TicketListPage
+              break;
+            case 2:
+              // Navigate to User List Page
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => UserListPage()),
+              );
+              break;
+            case 3:
+              // Navigate to Pendapatan Screen (not yet implemented)
+              break;
+          }
+        },
+        items: const [
+          BottomNavigationBarItem(
+            icon: Icon(Icons.home, color: Colors.black),
+            label: 'Home',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.confirmation_number, color: Colors.black),
+            label: 'Ticket',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.people, color: Colors.black),
+            label: 'User',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.account_balance_wallet, color: Colors.black),
+            label: 'Pendapatan',
+          ),
+        ],
+        selectedItemColor: Colors.black,
+        unselectedItemColor: Colors.black,
+      ),
     );
   }
 
   Widget _buildTicketCard(BuildContext context, QueryDocumentSnapshot ticket) {
+    // Get the date field
+    dynamic dateField = ticket['date'];
+    String formattedDate = '';
+
+    // Check if the date is a Timestamp
+    if (dateField is Timestamp) {
+      // If it's a Timestamp, format it as a Date
+      formattedDate = DateFormat('MMMM dd, yyyy').format(dateField.toDate());
+    } else if (dateField is String) {
+      // If it's a String, use it directly or format it if needed
+      formattedDate =
+          dateField; // Assuming the date is in the required format already
+    }
+
     return Card(
       margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
       shape: RoundedRectangleBorder(
@@ -96,7 +173,7 @@ class TicketListPage extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  "Tanggal: ${ticket['date']}",
+                  "Tanggal: $formattedDate", // Display the formatted date
                   style: const TextStyle(fontSize: 14),
                 ),
                 Text(
