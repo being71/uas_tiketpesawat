@@ -65,6 +65,52 @@ class _TicketPageState extends State<TicketPage> {
     return currencyFormatter.format(amount);
   }
 
+  void _searchTickets() async {
+    // Validasi input
+    if (_asalController.text.isEmpty ||
+        _tujuanController.text.isEmpty ||
+        _penumpangController.text.isEmpty ||
+        _startDate == null ||
+        _endDate == null ||
+        _tipeKeberangkatan == null ||
+        _kelasPenerbangan == null) {
+      // Jika ada yang kosong, tampilkan pesan peringatan
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Semua kolom harus diisi')),
+      );
+      return;
+    }
+    print("Asal: ${_asalController.text}");
+    print("Tujuan: ${_tujuanController.text}");
+    print("Start Date: $_startDate");
+    print("End Date: $_endDate");
+    print("Jumlah Penumpang: ${_penumpangController.text}");
+    print("Tipe Keberangkatan: $_tipeKeberangkatan");
+    print("Kelas Penerbangan: $_kelasPenerbangan");
+
+    // Ambil data tiket berdasarkan kriteria pencarian
+    try {
+      List<Map<String, dynamic>> tickets =
+          await _firestoreService.getTicketsBySearch(
+        asal: capitalize(_asalController.text),
+        tujuan: capitalize(_tujuanController.text),
+        penumpang: int.parse(_penumpangController.text),
+        startDate: _startDate!,
+        endDate: _endDate!,
+        tipeKeberangkatan: _tipeKeberangkatan!,
+        kelasPenerbangan: _kelasPenerbangan!,
+      );
+
+      setState(() {
+        _tickets = tickets;
+      });
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Terjadi kesalahan: $e')),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -85,6 +131,7 @@ class _TicketPageState extends State<TicketPage> {
                           padding: const EdgeInsets.only(right: 8.0),
                           child: TextFormField(
                             controller: _asalController,
+                            textCapitalization: TextCapitalization.words,
                             decoration: const InputDecoration(
                               border: OutlineInputBorder(),
                               labelText: 'Asal',
@@ -97,6 +144,7 @@ class _TicketPageState extends State<TicketPage> {
                           padding: const EdgeInsets.only(left: 8.0),
                           child: TextFormField(
                             controller: _tujuanController,
+                            textCapitalization: TextCapitalization.words,
                             decoration: const InputDecoration(
                               border: OutlineInputBorder(),
                               labelText: 'Tujuan',
@@ -115,7 +163,7 @@ class _TicketPageState extends State<TicketPage> {
                           child: Container(
                             height: 54,
                             padding: const EdgeInsets.symmetric(
-                                horizontal: 12.0, vertical: 12.0),
+                                horizontal: 5.0, vertical: 5.0),
                             decoration: BoxDecoration(
                               color: Colors.blue,
                               borderRadius: BorderRadius.circular(8.0),
@@ -127,7 +175,7 @@ class _TicketPageState extends State<TicketPage> {
                                     : 'Pilih Tanggal',
                                 style: const TextStyle(
                                   color: Colors.white,
-                                  fontSize: 15.0,
+                                  fontSize: 13,
                                   fontWeight: FontWeight.bold,
                                 ),
                               ),
@@ -208,14 +256,12 @@ class _TicketPageState extends State<TicketPage> {
                   ),
                   const SizedBox(height: 15),
                   ElevatedButton(
-                    onPressed: () {
-                      // Logic pencarian tiket
-                    },
+                    onPressed: _searchTickets, // Panggil fungsi pencarian
                     child: const Text('Cari'),
                     style: ElevatedButton.styleFrom(
                       minimumSize: const Size(double.infinity, 48),
                     ),
-                  ),
+                  )
                 ],
               ),
               const SizedBox(height: 20),
@@ -287,6 +333,10 @@ class _TicketPageState extends State<TicketPage> {
         ],
       ),
     );
+  }
+
+  String capitalize(String text) {
+    return text[0].toUpperCase() + text.substring(1);
   }
 }
 
