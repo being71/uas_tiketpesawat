@@ -16,7 +16,7 @@ class FirestoreService {
     }
   }
 
-// Fungsi untuk mengecek apakah data pengguna ada di Firestore
+  // Fungsi untuk mengecek apakah data pengguna ada di Firestore
   Future<bool> isUserExists(String userId) async {
     try {
       DocumentSnapshot userDoc =
@@ -40,6 +40,27 @@ class FirestoreService {
       }
     } catch (e) {
       throw Exception("Gagal mengambil data pengguna: $e");
+    }
+  }
+
+  // Fungsi untuk membuat data pengguna baru di Firestore
+  Future<void> createUser({
+    required String uid,
+    required String email,
+    required String nama,
+    required String noTelp,
+    required String status,
+  }) async {
+    try {
+      await firestore.collection('users').doc(uid).set({
+        'email': email,
+        'nama': nama,
+        'noTelp': noTelp,
+        'status': status,
+        'createdAt': FieldValue.serverTimestamp(), // Tambahkan waktu pembuatan
+      });
+    } catch (e) {
+      throw Exception("Gagal menyimpan data pengguna: $e");
     }
   }
 }

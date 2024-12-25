@@ -1,6 +1,9 @@
 // ignore_for_file: file_names
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:uas_tiketpesawat/home_screen_admin.dart';
+import 'package:uas_tiketpesawat/register.dart';
+import 'package:uas_tiketpesawat/add_tiket_page.dart';
 import 'firestore.dart';
 import 'home.dart';
 
@@ -55,11 +58,11 @@ class LoginPageState extends State<LoginPage> {
           } else if (status == 'admin') {
             // Navigasi ke HomeAdminScreen
             if (mounted) {
-              /*Navigator.pushAndRemoveUntil(
-              context,
-              MaterialPageRoute(builder: (context) => const HomeAdminPage()),
-              (Route<dynamic> route) => false,
-            );*/
+              Navigator.pushAndRemoveUntil(
+                context,
+                MaterialPageRoute(builder: (context) => HomeScreenAdmin()),
+                (Route<dynamic> route) => false,
+              );
             }
           } else {
             setState(() {
@@ -137,12 +140,12 @@ class LoginPageState extends State<LoginPage> {
                 ),
                 ElevatedButton(
                   onPressed: () {
-                    /*Navigator.pushReplacement(
+                    Navigator.pushReplacement(
                       context,
                       MaterialPageRoute(
                         builder: (context) => DaftarPage(),
                       ),
-                    ); */
+                    );
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor:
