@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:intl/intl.dart';
 
 class FirestoreService {
   final FirebaseFirestore firestore = FirebaseFirestore.instance;
@@ -61,6 +62,38 @@ class FirestoreService {
       });
     } catch (e) {
       throw Exception("Gagal menyimpan data pengguna: $e");
+    }
+  }
+
+  // Fetch tickets from Firestore
+  Future<List<Map<String, dynamic>>> getTickets() async {
+    try {
+      QuerySnapshot snapshot = await firestore.collection('tickets').get();
+      List<Map<String, dynamic>> tickets = snapshot.docs.map((doc) {
+        return {
+          'arrivalTime': doc['arrivalTime'] ?? 'Unknown Arrival',
+          'baggageInfo': doc['baggageInfo'] ?? 0,
+          'createdAt': doc['createdAt'],
+          'date': doc['date'] ?? 'Unknown Date',
+          'departureTime': doc['departureTime'] ?? 'Unknown Departure',
+          'destination': doc['destination'] ?? 'Unknown Destination',
+          'destinationCode':
+              doc['destinationCode'] ?? 'Unknown Destination Code',
+          'flightClass': doc['flightClass'] ?? 'Unknown Class',
+          'flightDuration': doc['flightDuration'] ?? 0,
+          'flightType': doc['flightType'] ?? 'Unknown Type',
+          'origin': doc['origin'] ?? 'Unknown Origin',
+          'originCode': doc['originCode'] ?? 'Unknown Origin Code',
+          'price': doc['price'] ?? 0,
+          'seatCount': doc['seatCount'] ?? 0,
+          'status': doc['status'] ?? 'Unknown Status',
+        };
+      }).toList();
+
+      return tickets;
+    } catch (e) {
+      print('Error fetching tickets: $e');
+      return [];
     }
   }
 }

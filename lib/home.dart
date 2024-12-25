@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'firestore.dart';
+import 'tiketpage.dart';
 
 class HomePage extends StatelessWidget {
   final String userId;
@@ -30,7 +31,6 @@ class HomePage extends StatelessWidget {
               ),
             ),
 
-            // Icon and button
             Container(
               margin: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 0),
               padding: const EdgeInsets.all(10.0),
@@ -41,22 +41,25 @@ class HomePage extends StatelessWidget {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  // Icon and Text wrapped in their own container
-                  Container(
-                    padding: const EdgeInsets.all(
-                        10), // Padding for the icon and text
-                    decoration: BoxDecoration(
-                      color: Colors
-                          .transparent, // Optional: Change background color if needed
-                      borderRadius: BorderRadius.circular(8.0),
-                    ),
+                  // Icon and Text
+                  GestureDetector(
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) =>
+                              TicketPage(), // Pindah ke TicketPage
+                        ),
+                      );
+                    },
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.start,
                       children: [
                         Image.asset(
-                          'assets/airplane.png', // Your image path
+                          'assets/airplane.png', // Path gambar Anda
                           width: 150,
-                          height: 70, color: Colors.white,
+                          height: 70,
+                          color: Colors.white,
                         ),
                         const SizedBox(width: 30),
                         const Column(
@@ -86,7 +89,6 @@ class HomePage extends StatelessWidget {
                 ],
               ),
             ),
-
             // Two small banners side by side
             Row(
               children: [
