@@ -17,6 +17,7 @@ class _TicketPageState extends State<TicketPage> {
   final TextEditingController _destinationCodeController =
       TextEditingController();
   final TextEditingController _dateController = TextEditingController();
+  final TextEditingController _returnDateController = TextEditingController();
   final TextEditingController _seatController = TextEditingController();
   final TextEditingController _priceController = TextEditingController();
   final TextEditingController _baggageInfoController = TextEditingController();
@@ -52,7 +53,8 @@ class _TicketPageState extends State<TicketPage> {
         baggageInfo.isEmpty ||
         flightDuration.isEmpty ||
         departureTime.isEmpty ||
-        arrivalTime.isEmpty) {
+        arrivalTime.isEmpty ||
+        (_flightType == 'Pulang Pergi' && _returnDateController.text.isEmpty)) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Semua kolom wajib diisi!')),
       );
@@ -65,12 +67,22 @@ class _TicketPageState extends State<TicketPage> {
           DateFormat('dd/MM/yyyy').parse(_dateController.text);
       final Timestamp timestamp = Timestamp.fromDate(parsedDate);
 
+      // For the return date, if it exists
+      Timestamp? returnTimestamp;
+      if (_flightType == 'Pulang Pergi' &&
+          _returnDateController.text.isNotEmpty) {
+        final DateTime parsedReturnDate =
+            DateFormat('dd/MM/yyyy').parse(_returnDateController.text);
+        returnTimestamp = Timestamp.fromDate(parsedReturnDate);
+      }
+
       await FirebaseFirestore.instance.collection('tickets').add({
         'origin': origin,
         'originCode': originCode,
         'destination': destination,
         'destinationCode': destinationCode,
         'date': timestamp,
+        'returnDate': returnTimestamp,
         'flightType': _flightType,
         'flightClass': _flightClass,
         'seatCount': int.parse(seatCount),
@@ -106,6 +118,7 @@ class _TicketPageState extends State<TicketPage> {
     _flightDurationController.clear();
     _departureTimeController.clear();
     _arrivalTimeController.clear();
+    _returnDateController.clear();
     setState(() {
       _flightType = 'Sekali Jalan';
       _flightClass = 'Ekonomi';
@@ -205,6 +218,9 @@ class _TicketPageState extends State<TicketPage> {
                 onChanged: (value) {
                   setState(() {
                     _flightType = value!;
+                    if (_flightType == 'Sekali Jalan') {
+                      _returnDateController.clear();
+                    }
                   });
                 },
                 decoration: const InputDecoration(
@@ -212,6 +228,33 @@ class _TicketPageState extends State<TicketPage> {
                   border: OutlineInputBorder(),
                 ),
               ),
+              const SizedBox(height: 16),
+              if (_flightType == 'Pulang Pergi')
+                TextField(
+                  controller: _returnDateController,
+                  readOnly: true,
+                  decoration: const InputDecoration(
+                    labelText: 'Tanggal Pulang',
+                    border: OutlineInputBorder(),
+                  ),
+                  onTap: () async {
+                    DateTime? pickedDate = await showDatePicker(
+                      context: context,
+                      initialDate: DateTime.now(),
+                      firstDate: DateTime(2000),
+                      lastDate: DateTime(2100),
+                    );
+
+                    if (pickedDate != null) {
+                      String formattedDate =
+                          "${pickedDate.day}/${pickedDate.month}/${pickedDate.year}";
+
+                      setState(() {
+                        _returnDateController.text = formattedDate;
+                      });
+                    }
+                  },
+                ),
               const SizedBox(height: 16),
               DropdownButtonFormField<String>(
                 value: _flightClass,
