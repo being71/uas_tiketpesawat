@@ -12,7 +12,10 @@ class TicketPage extends StatefulWidget {
 
 class _TicketPageState extends State<TicketPage> {
   final TextEditingController _originController = TextEditingController();
+  final TextEditingController _originCodeController = TextEditingController();
   final TextEditingController _destinationController = TextEditingController();
+  final TextEditingController _destinationCodeController =
+      TextEditingController();
   final TextEditingController _dateController = TextEditingController();
   final TextEditingController _seatController = TextEditingController();
   final TextEditingController _priceController = TextEditingController();
@@ -28,7 +31,9 @@ class _TicketPageState extends State<TicketPage> {
 
   Future<void> _addTicket() async {
     String origin = _originController.text.trim();
+    String originCode = _originCodeController.text.trim();
     String destination = _destinationController.text.trim();
+    String destinationCode = _destinationCodeController.text.trim();
     String date = _dateController.text.trim();
     String seatCount = _seatController.text.trim();
     String price = _priceController.text.trim();
@@ -38,7 +43,9 @@ class _TicketPageState extends State<TicketPage> {
     String arrivalTime = _arrivalTimeController.text.trim();
 
     if (origin.isEmpty ||
+        originCode.isEmpty ||
         destination.isEmpty ||
+        destinationCode.isEmpty ||
         date.isEmpty ||
         seatCount.isEmpty ||
         price.isEmpty ||
@@ -53,17 +60,21 @@ class _TicketPageState extends State<TicketPage> {
     }
 
     try {
-      // Parsing harga dengan menghilangkan semua karakter non-digit
       int parsedPrice = int.parse(price.replaceAll(RegExp(r'[^\d]'), ''));
+      final DateTime parsedDate =
+          DateFormat('dd/MM/yyyy').parse(_dateController.text);
+      final Timestamp timestamp = Timestamp.fromDate(parsedDate);
 
       await FirebaseFirestore.instance.collection('tickets').add({
         'origin': origin,
+        'originCode': originCode,
         'destination': destination,
-        'date': date,
+        'destinationCode': destinationCode,
+        'date': timestamp,
         'flightType': _flightType,
         'flightClass': _flightClass,
         'seatCount': int.parse(seatCount),
-        'price': parsedPrice, // Pastikan harga dalam bentuk integer
+        'price': parsedPrice,
         'baggageInfo': int.parse(baggageInfo),
         'flightDuration': int.parse(flightDuration),
         'departureTime': departureTime,
@@ -85,7 +96,9 @@ class _TicketPageState extends State<TicketPage> {
 
   void _clearFields() {
     _originController.clear();
+    _originCodeController.clear();
     _destinationController.clear();
+    _destinationCodeController.clear();
     _dateController.clear();
     _seatController.clear();
     _priceController.clear();
@@ -132,6 +145,14 @@ class _TicketPageState extends State<TicketPage> {
               ),
               const SizedBox(height: 16),
               TextField(
+                controller: _originCodeController,
+                decoration: const InputDecoration(
+                  labelText: 'Kode Bandara Asal',
+                  border: OutlineInputBorder(),
+                ),
+              ),
+              const SizedBox(height: 16),
+              TextField(
                 controller: _destinationController,
                 decoration: const InputDecoration(
                   labelText: 'Bandara Tujuan',
@@ -140,9 +161,16 @@ class _TicketPageState extends State<TicketPage> {
               ),
               const SizedBox(height: 16),
               TextField(
+                controller: _destinationCodeController,
+                decoration: const InputDecoration(
+                  labelText: 'Kode Bandara Tujuan',
+                  border: OutlineInputBorder(),
+                ),
+              ),
+              const SizedBox(height: 16),
+              TextField(
                 controller: _dateController,
-                readOnly:
-                    true, // Membuat TextField hanya bisa diisi melalui DatePicker
+                readOnly: true,
                 decoration: const InputDecoration(
                   labelText: 'Tanggal Tiket',
                   border: OutlineInputBorder(),
@@ -151,18 +179,16 @@ class _TicketPageState extends State<TicketPage> {
                   DateTime? pickedDate = await showDatePicker(
                     context: context,
                     initialDate: DateTime.now(),
-                    firstDate: DateTime(2000), // Batas awal tanggal
-                    lastDate: DateTime(2100), // Batas akhir tanggal
+                    firstDate: DateTime(2000),
+                    lastDate: DateTime(2100),
                   );
 
                   if (pickedDate != null) {
-                    // Format tanggal menjadi dd/MM/yyyy
                     String formattedDate =
                         "${pickedDate.day}/${pickedDate.month}/${pickedDate.year}";
 
                     setState(() {
-                      _dateController.text =
-                          formattedDate; // Set nilai ke TextField
+                      _dateController.text = formattedDate;
                     });
                   }
                 },
@@ -252,8 +278,7 @@ class _TicketPageState extends State<TicketPage> {
               const SizedBox(height: 16),
               TextField(
                 controller: _departureTimeController,
-                readOnly:
-                    true, // Membuat TextField hanya bisa diisi melalui TimePicker
+                readOnly: true,
                 decoration: const InputDecoration(
                   labelText: 'Jam Keberangkatan',
                   border: OutlineInputBorder(),
@@ -265,12 +290,10 @@ class _TicketPageState extends State<TicketPage> {
                   );
 
                   if (pickedTime != null) {
-                    // Format waktu menjadi HH:mm
                     String formattedTime = pickedTime.format(context);
 
                     setState(() {
-                      _departureTimeController.text =
-                          formattedTime; // Set nilai ke TextField
+                      _departureTimeController.text = formattedTime;
                     });
                   }
                 },
@@ -278,8 +301,7 @@ class _TicketPageState extends State<TicketPage> {
               const SizedBox(height: 16),
               TextField(
                 controller: _arrivalTimeController,
-                readOnly:
-                    true, // Membuat TextField hanya bisa diisi melalui TimePicker
+                readOnly: true,
                 decoration: const InputDecoration(
                   labelText: 'Perkiraan Jam Mendarat',
                   border: OutlineInputBorder(),
@@ -291,12 +313,10 @@ class _TicketPageState extends State<TicketPage> {
                   );
 
                   if (pickedTime != null) {
-                    // Format waktu menjadi HH:mm
                     String formattedTime = pickedTime.format(context);
 
                     setState(() {
-                      _arrivalTimeController.text =
-                          formattedTime; // Set nilai ke TextField
+                      _arrivalTimeController.text = formattedTime;
                     });
                   }
                 },
@@ -305,9 +325,8 @@ class _TicketPageState extends State<TicketPage> {
               Center(
                 child: ElevatedButton(
                   onPressed: () async {
-                    await _addTicket(); // Tambah tiket ke Firestore
+                    await _addTicket();
                     Navigator.push(
-                      // Navigasi ke daftar tiket
                       context,
                       MaterialPageRoute(
                           builder: (context) => const TicketListPage()),
