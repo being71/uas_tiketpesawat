@@ -5,7 +5,7 @@ import 'package:uas_tiketpesawat/home_screen_admin.dart';
 import 'package:uas_tiketpesawat/register.dart';
 import 'package:uas_tiketpesawat/add_tiket_page.dart';
 import 'firestore.dart';
-import 'home.dart';
+import 'home_screen_user.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -49,7 +49,7 @@ class LoginPageState extends State<LoginPage> {
               Navigator.pushAndRemoveUntil(
                 context,
                 MaterialPageRoute(
-                    builder: (context) => const HomePage(
+                    builder: (context) => const HomeScreenUser(
                           userId: 'user.uid',
                         )),
                 (Route<dynamic> route) => false,
