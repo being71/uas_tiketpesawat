@@ -49,7 +49,7 @@ class LoginPageState extends State<LoginPage> {
               Navigator.pushAndRemoveUntil(
                 context,
                 MaterialPageRoute(
-                    builder: (context) => const HomePage(
+                    builder: (context) => const HomeScreenUser(
                           userId: 'user.uid',
                         )),
                 (Route<dynamic> route) => false,

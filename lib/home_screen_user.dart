@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 import 'firestore.dart';
 import 'tiketpage.dart';
 
-class HomePage extends StatelessWidget {
+class HomeScreenUser extends StatelessWidget {
   final String userId;
 
-  const HomePage({Key? key, required this.userId}) : super(key: key);
+  const HomeScreenUser({Key? key, required this.userId}) : super(key: key);
 
   Future<Map<String, dynamic>> _fetchUserData() async {
     return await FirestoreService().getUserData(userId);
