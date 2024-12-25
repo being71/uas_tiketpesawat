@@ -96,4 +96,58 @@ class FirestoreService {
       return [];
     }
   }
+
+  // Fungsi untuk mencari tiket berdasarkan kriteria pencarian
+  Future<List<Map<String, dynamic>>> getTicketsBySearch({
+    required String asal,
+    required String tujuan,
+    required int penumpang,
+    required DateTime startDate,
+    required DateTime endDate,
+    required String tipeKeberangkatan,
+    required String kelasPenerbangan,
+  }) async {
+    try {
+      Query query = firestore.collection('tickets');
+
+      // Filter berdasarkan asal dan tujuan
+      query = query
+          .where('origin', isEqualTo: asal)
+          .where('destination', isEqualTo: tujuan)
+          .where('flightType', isEqualTo: tipeKeberangkatan)
+          .where('flightClass', isEqualTo: kelasPenerbangan);
+
+      // Filter berdasarkan tanggal keberangkatan
+      query = query
+          .where('date', isGreaterThanOrEqualTo: startDate)
+          .where('date', isLessThanOrEqualTo: endDate);
+
+      // Ambil tiket sesuai kriteria
+      QuerySnapshot snapshot = await query.get();
+      List<Map<String, dynamic>> tickets = snapshot.docs.map((doc) {
+        return {
+          'arrivalTime': doc['arrivalTime'] ?? 'Unknown Arrival',
+          'baggageInfo': doc['baggageInfo'] ?? 0,
+          'createdAt': doc['createdAt'],
+          'date': doc['date'] ?? 'Unknown Date',
+          'departureTime': doc['departureTime'] ?? 'Unknown Departure',
+          'destination': doc['destination'] ?? 'Unknown Destination',
+          'destinationCode':
+              doc['destinationCode'] ?? 'Unknown Destination Code',
+          'flightClass': doc['flightClass'] ?? 'Unknown Class',
+          'flightDuration': doc['flightDuration'] ?? 0,
+          'flightType': doc['flightType'] ?? 'Unknown Type',
+          'origin': doc['origin'] ?? 'Unknown Origin',
+          'originCode': doc['originCode'] ?? 'Unknown Origin Code',
+          'price': doc['price'] ?? 0,
+          'seatCount': doc['seatCount'] ?? 0,
+          'status': doc['status'] ?? 'Unknown Status',
+        };
+      }).toList();
+
+      return tickets;
+    } catch (e) {
+      throw Exception("Gagal melakukan pencarian tiket: $e");
+    }
+  }
 }
