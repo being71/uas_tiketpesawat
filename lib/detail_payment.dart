@@ -165,13 +165,19 @@ class _DetailPaymentPageState extends State<DetailPaymentPage> {
                     ListTile(
                       leading: Icon(Icons.location_on, color: Colors.blue),
                       title: const Text('Asal'),
-                      subtitle: Text(widget.ticket['originCode']),
+                      subtitle: Text(widget.ticket['origin'] +
+                          ' (' +
+                          widget.ticket['originCode'] +
+                          ')'),
                     ),
                     ListTile(
                       leading:
                           Icon(Icons.location_on_outlined, color: Colors.blue),
                       title: const Text('Tujuan'),
-                      subtitle: Text(widget.ticket['destinationCode']),
+                      subtitle: Text(widget.ticket['destination'] +
+                          ' (' +
+                          widget.ticket['destinationCode'] +
+                          ')'),
                     ),
                   ],
                 ),

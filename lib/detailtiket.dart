@@ -102,7 +102,9 @@ class DetailTiketPage extends StatelessWidget {
                     'Asal',
                     style: TextStyle(fontWeight: FontWeight.bold),
                   ),
-                  subtitle: Text(ticket['originCode'] ?? 'Tidak Diketahui'),
+                  subtitle: Text(
+                      ticket['origin'] + ' (' + ticket['originCode'] + ')' ??
+                          'Tidak Diketahui'),
                 ),
                 ListTile(
                   leading: Icon(Icons.location_on_outlined,
@@ -111,8 +113,11 @@ class DetailTiketPage extends StatelessWidget {
                     'Tujuan',
                     style: TextStyle(fontWeight: FontWeight.bold),
                   ),
-                  subtitle:
-                      Text(ticket['destinationCode'] ?? 'Tidak Diketahui'),
+                  subtitle: Text(ticket['destination'] +
+                          ' (' +
+                          ticket['destinationCode'] +
+                          ')' ??
+                      'Tidak Diketahui'),
                 ),
               ],
             ),
