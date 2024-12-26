@@ -1,6 +1,9 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'firestore.dart'; // Import the Firestore service
+import 'firestore.dart';
+import 'home_screen_user.dart';
+import 'profile_page.dart';
 
 class TicketPage extends StatefulWidget {
   @override
@@ -17,6 +20,7 @@ class _TicketPageState extends State<TicketPage> {
   final TextEditingController _penumpangController = TextEditingController();
   DateTime? _startDate;
   DateTime? _endDate;
+  int _selectedIndex = 0; // Index for the selected tab
 
   String? _tipeKeberangkatan; // Dropdown value for Tipe Keberangkatan
   String? _kelasPenerbangan; // Dropdown value for Kelas Penerbangan
@@ -317,6 +321,37 @@ class _TicketPageState extends State<TicketPage> {
       ),
       // Bottom Navigation Bar
       bottomNavigationBar: BottomNavigationBar(
+        currentIndex: _selectedIndex, // Simpan indeks tab yang dipilih
+        onTap: (index) {
+          setState(() {
+            _selectedIndex = index;
+          });
+
+          switch (index) {
+            case 0:
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(
+                    builder: (context) => HomeScreenUser(
+                        userId: FirebaseAuth.instance.currentUser!.uid)),
+              );
+              break;
+            case 1:
+            /*Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => PesananPage()),
+        );
+        break;*/
+            case 2:
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(
+                    builder: (context) => ProfilePage(
+                        userId: FirebaseAuth.instance.currentUser!.uid)),
+              );
+              break;
+          }
+        },
         items: const [
           BottomNavigationBarItem(
             icon: Icon(Icons.home),
