@@ -77,6 +77,7 @@ class _TicketPageState extends State<TicketPage> {
     if (_asalController.text.isEmpty ||
         _tujuanController.text.isEmpty ||
         _penumpangController.text.isEmpty ||
+        int.parse(_penumpangController.text) <= 0 ||
         _startDate == null ||
         _endDate == null ||
         _tipeKepergian == null ||
@@ -119,9 +120,11 @@ class _TicketPageState extends State<TicketPage> {
         maxHarga: maxHarga.toString(),
       );
 
-// Filter tiket berdasarkan jumlah penumpang dan seatCount
+      // Filter tiket berdasarkan jumlah penumpang dan seatCount
       List<Map<String, dynamic>> filteredTickets = tickets.where((ticket) {
-        int seatCount = int.parse(ticket['seatCount'] ?? '0');
+        // Pastikan 'seatCount' sudah dalam bentuk int
+        int seatCount = int.tryParse(ticket['seatCount'].toString()) ??
+            0; // Mengonversi ke int, jika gagal gunakan 0
         return seatCount >=
             jumlahPenumpang; // Hanya tampilkan tiket jika seatCount cukup
       }).toList();
