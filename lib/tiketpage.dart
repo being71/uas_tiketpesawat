@@ -4,6 +4,7 @@ import 'firestore.dart';
 import 'home_screen_user.dart';
 import 'profile_page.dart';
 import 'detailtiket.dart';
+import 'checkoutpage.dart';
 
 class TicketPage extends StatefulWidget {
   final String userId;
@@ -377,6 +378,7 @@ class _TicketPageState extends State<TicketPage> {
                                 );
                               },
                               child: FlightCardOneWay(
+                                ticket: ticket,
                                 flightType: ticket['flightType'] ??
                                     'Unknown Flight Type',
                                 airline: ticket['airline'] ?? 'Unknown',
@@ -406,6 +408,7 @@ class _TicketPageState extends State<TicketPage> {
                                 );
                               },
                               child: FlightCardTwoWay(
+                                ticket: ticket,
                                 flightType: ticket['flightType'] ??
                                     'Unknown Flight Type',
                                 departureTime:
@@ -489,6 +492,7 @@ class FlightCardOneWay extends StatelessWidget {
   final String flightClass;
   final String origin;
   final String destination;
+  final Map<String, dynamic> ticket;
 
   const FlightCardOneWay({
     Key? key,
@@ -501,6 +505,7 @@ class FlightCardOneWay extends StatelessWidget {
     required this.flightClass,
     required this.origin,
     required this.destination,
+    required this.ticket,
   }) : super(key: key);
 
   @override
@@ -634,6 +639,7 @@ class FlightCardTwoWay extends StatelessWidget {
   final String flightClass;
   final String origin;
   final String destination;
+  final Map<String, dynamic> ticket;
 
   const FlightCardTwoWay({
     Key? key,
@@ -646,6 +652,7 @@ class FlightCardTwoWay extends StatelessWidget {
     required this.flightClass,
     required this.origin,
     required this.destination,
+    required this.ticket,
   }) : super(key: key);
 
   @override
@@ -822,7 +829,15 @@ class FlightCardTwoWay extends StatelessWidget {
                 ),
               ),
               ElevatedButton(
-                onPressed: () {},
+                onPressed: () {
+                  // Navigate to CheckoutPage
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => CheckoutPage(ticket: ticket),
+                    ),
+                  );
+                },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.white,
                   shape: RoundedRectangleBorder(
