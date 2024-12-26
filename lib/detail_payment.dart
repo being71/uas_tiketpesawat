@@ -22,7 +22,7 @@ class _DetailPaymentPageState extends State<DetailPaymentPage> {
   Future<void> _saveToFirebase() async {
     try {
       // Ambil ID tiket dari data yang dikirimkan
-      final ticketId = widget.ticket['id'];
+      final ticketId = widget.ticket['docId'];
       print('Ticket ID: $ticketId');
 
       if (ticketId == null || ticketId.isEmpty) {

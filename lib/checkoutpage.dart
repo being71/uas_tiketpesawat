@@ -31,6 +31,10 @@ class _CheckoutPageState extends State<CheckoutPage> {
   void initState() {
     super.initState();
     _initializePassengers();
+
+    // Cetak docId tiket ke konsol
+    final docId = widget.ticket['docId'];
+    print('DocId tiket yang sedang dilihat: $docId');
   }
 
   void _navigateToPaymentPage() {

@@ -70,6 +70,7 @@ class FirestoreService {
       QuerySnapshot snapshot = await firestore.collection('tickets').get();
       List<Map<String, dynamic>> tickets = snapshot.docs.map((doc) {
         return {
+          'docId': doc.id,
           'airline': doc['airline'] ?? 'Unknown Airline',
           'arrivalTime': doc['arrivalTime'] ?? 'Unknown Arrival',
           'baggageInfo': doc['baggageInfo'] ?? 0,
@@ -131,6 +132,7 @@ class FirestoreService {
       QuerySnapshot snapshot = await query.get();
       List<Map<String, dynamic>> tickets = snapshot.docs.map((doc) {
         return {
+          'docId': doc.id,
           'arrivalTime': doc['arrivalTime'] ?? 'Unknown Arrival',
           'baggageInfo': doc['baggageInfo'] ?? 0,
           'createdAt': doc['createdAt'],
@@ -153,7 +155,7 @@ class FirestoreService {
 
       return tickets;
     } catch (e) {
-      throw Exception("Gagal melakukan pencarian tiket: $e");
+      throw Exception("Gagal melakukan pencarian tiket:$e");
     }
   }
 }
