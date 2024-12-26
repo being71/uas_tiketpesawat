@@ -351,10 +351,41 @@ class _TicketPageState extends State<TicketPage> {
                         itemBuilder: (context, index) {
                           var ticket = _tickets[index];
 
+                          // Tambahkan logika filtering berdasarkan tipe kepergian
+                          if (_tipeKepergian == 'Sekali Jalan' &&
+                              ticket['flightType'] != 'Sekali Jalan') {
+                            return SizedBox
+                                .shrink(); // Tidak menampilkan tiket jika tipe kepergian tidak sesuai
+                          } else if (_tipeKepergian == 'Pulang Pergi' &&
+                              ticket['flightType'] != 'Pulang Pergi') {
+                            return SizedBox
+                                .shrink(); // Tidak menampilkan tiket jika tipe kepergian tidak sesuai
+                          }
+
+                          print('Ticket ${index + 1}:');
+                          print(
+                              'Flight Type: ${ticket['flightType'] ?? 'Unknown Flight Type'}');
+                          print('airline: ${ticket['airline'] ?? 'Unknown'}');
+                          print(
+                              'Departure Time: ${ticket['departureTime'] ?? 'Unknown'}');
+                          print(
+                              'Arrival Time: ${ticket['arrivalTime'] ?? 'Unknown'}');
+                          print(
+                              'Flight Duration: ${ticket['flightDuration'] ?? 0}');
+                          print('Price: ${formatRupiah(ticket['price'] ?? 0)}');
+                          print(
+                              'Flight Class: ${ticket['flightClass'] ?? 'Unknown Class'}');
+                          print(
+                              'Origin: ${ticket['originCode'] ?? 'Unknown Origin'}');
+                          print(
+                              'Destination: ${ticket['destinationCode'] ?? 'Unknown Destination'}');
+                          print('---');
+
                           if (_tipeKepergian == 'Sekali Jalan') {
                             return FlightCardOneWay(
-                              airline:
+                              flightType:
                                   ticket['flightType'] ?? 'Unknown Flight Type',
+                              airline: ticket['airline'] ?? 'Unknown',
                               departureTime:
                                   ticket['departureTime'] ?? 'Unknown',
                               arrivalTime: ticket['arrivalTime'] ?? 'Unknown',
@@ -362,14 +393,13 @@ class _TicketPageState extends State<TicketPage> {
                               price: formatRupiah(ticket['price'] ?? 0),
                               flightClass:
                                   ticket['flightClass'] ?? 'Unknown Class',
-                              origin: ticket['originCode'] ??
-                                  'Unknown Origin', // Default value added
+                              origin: ticket['originCode'] ?? 'Unknown Origin',
                               destination: ticket['destinationCode'] ??
-                                  'Unknown Destination', // Default value added
+                                  'Unknown Destination',
                             );
                           } else if (_tipeKepergian == 'Pulang Pergi') {
                             return FlightCardTwoWay(
-                              airline:
+                              flightType:
                                   ticket['flightType'] ?? 'Unknown Flight Type',
                               departureTime:
                                   ticket['departureTime'] ?? 'Unknown',
@@ -378,12 +408,13 @@ class _TicketPageState extends State<TicketPage> {
                               price: formatRupiah(ticket['price'] ?? 0),
                               flightClass:
                                   ticket['flightClass'] ?? 'Unknown Class',
-                              origin: ticket['originCode'] ??
-                                  'Unknown Origin', // Default value added
+                              origin: ticket['originCode'] ?? 'Unknown Origin',
                               destination: ticket['destinationCode'] ??
-                                  'Unknown Destination', // Default value added
+                                  'Unknown Destination',
+                              airline: ticket['airline'] ?? 'Unknowns',
                             );
                           }
+                          return null;
                         },
                       ),
               ),
@@ -439,6 +470,7 @@ class _TicketPageState extends State<TicketPage> {
 
 class FlightCardOneWay extends StatelessWidget {
   final String airline;
+  final String flightType;
   final String departureTime;
   final String arrivalTime;
   final int flightDuration;
@@ -450,6 +482,7 @@ class FlightCardOneWay extends StatelessWidget {
   const FlightCardOneWay({
     Key? key,
     required this.airline,
+    required this.flightType,
     required this.departureTime,
     required this.arrivalTime,
     required this.flightDuration,
@@ -582,6 +615,7 @@ class FlightCardOneWay extends StatelessWidget {
 
 class FlightCardTwoWay extends StatelessWidget {
   final String airline;
+  final String flightType;
   final String departureTime;
   final String arrivalTime;
   final int flightDuration;
@@ -593,6 +627,7 @@ class FlightCardTwoWay extends StatelessWidget {
   const FlightCardTwoWay({
     Key? key,
     required this.airline,
+    required this.flightType,
     required this.departureTime,
     required this.arrivalTime,
     required this.flightDuration,
@@ -619,101 +654,144 @@ class FlightCardTwoWay extends StatelessWidget {
         ],
       ),
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: [
           // Flight details section
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
-                decoration: BoxDecoration(
-                  color: Colors.grey.shade300,
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Text(
-                  flightClass,
-                  style: const TextStyle(fontSize: 12, color: Colors.black54),
-                ),
+              Row(
+                children: [
+                  Container(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: Colors.grey.shade300,
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Text(
+                      flightClass,
+                      style:
+                          const TextStyle(fontSize: 12, color: Colors.black54),
+                    ),
+                  ),
+                ],
               ),
-              const SizedBox(height: 8.0),
-              Text(
-                airline,
-                style: const TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                ),
+              SizedBox(height: 10),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                mainAxisAlignment: MainAxisAlignment
+                    .end, // This will ensure content is spread out vertically
+                children: [
+                  Row(
+                    children: [
+                      Column(
+                        children: [
+                          Text(
+                            '$airline',
+                            style: const TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ],
+                      ),
+                      SizedBox(width: 30),
+                      Column(
+                        children: [
+                          Row(
+                            children: [
+                              Text(
+                                departureTime,
+                                style: const TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              Text(' $origin'),
+                              const SizedBox(height: 4.0),
+                            ],
+                          ),
+                          Text(
+                            '• $flightDuration jam',
+                            style: const TextStyle(
+                                fontSize: 12, color: Colors.black54),
+                          ),
+                          const SizedBox(height: 4.0),
+                          Row(
+                            children: [
+                              Text(
+                                arrivalTime,
+                                style: const TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              Text(' $destination'),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                  SizedBox(height: 20),
+                  Row(
+                    children: [
+                      Column(
+                        children: [
+                          Text(
+                            '$airline',
+                            style: const TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ],
+                      ),
+                      SizedBox(width: 30),
+                      Column(
+                        children: [
+                          Row(
+                            children: [
+                              Text(
+                                departureTime,
+                                style: const TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              Text(' $origin'),
+                              const SizedBox(height: 4.0),
+                            ],
+                          ),
+                          Text(
+                            '• $flightDuration jam',
+                            style: const TextStyle(
+                                fontSize: 12, color: Colors.black54),
+                          ),
+                          const SizedBox(height: 4.0),
+                          Row(
+                            children: [
+                              Text(
+                                arrivalTime,
+                                style: const TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              Text(' $destination'),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ],
               ),
             ],
           ),
-
+          SizedBox(height: 10),
           // Time & Location section
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              Row(
-                children: [
-                  Text(
-                    departureTime,
-                    style: const TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  Text(' $origin'),
-                ],
-              ),
-              const SizedBox(height: 4.0),
-              Text(
-                '• $flightDuration jam',
-                style: const TextStyle(fontSize: 12, color: Colors.black54),
-              ),
-              const SizedBox(height: 4.0),
-              Row(
-                children: [
-                  Text(
-                    arrivalTime,
-                    style: const TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  Text(' $destination'),
-                ],
-              ),
-              SizedBox(height: 20),
-              Row(
-                children: [
-                  Text(
-                    departureTime,
-                    style: const TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  Text(' $destination'),
-                ],
-              ),
-              const SizedBox(height: 4.0),
-              Text(
-                '• $flightDuration jam',
-                style: const TextStyle(fontSize: 12, color: Colors.black54),
-              ),
-              Row(
-                children: [
-                  Text(
-                    arrivalTime,
-                    style: const TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  Text(' $origin'),
-                ],
-              ),
-            ],
-          ),
 
           // Price section
           Column(
