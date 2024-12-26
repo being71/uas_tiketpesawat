@@ -4,6 +4,7 @@ import 'package:intl/intl.dart'; // Import the intl package
 import 'package:uas_tiketpesawat/add_tiket_page.dart';
 import 'package:uas_tiketpesawat/Ticket_Detail_Page.dart';
 import 'package:uas_tiketpesawat/home_screen_admin.dart';
+import 'package:uas_tiketpesawat/pedapatan_screen.dart';
 import 'package:uas_tiketpesawat/user_list.dart'; // If you have a UserListPage
 
 class TicketListPage extends StatefulWidget {
@@ -90,6 +91,10 @@ class _TicketListPageState extends State<TicketListPage> {
               break;
             case 3:
               // Navigate to Pendapatan Screen (not yet implemented)
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => PendapatanScreen()),
+              );
               break;
           }
         },
@@ -198,6 +203,10 @@ class _TicketListPageState extends State<TicketListPage> {
             ),
             const Divider(height: 20),
             // Informasi tambahan tiket
+            Text(
+              "Maskapai: ${ticket['airline']}", // Menampilkan nama maskapai
+              style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+            ),
             Text(
               "Tipe Penerbangan: ${ticket['flightType']}",
               style: const TextStyle(fontSize: 14),

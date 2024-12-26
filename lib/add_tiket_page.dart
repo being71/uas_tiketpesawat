@@ -29,6 +29,7 @@ class _TicketPageState extends State<TicketPage> {
 
   String _flightType = 'Sekali Jalan';
   String _flightClass = 'Ekonomi';
+  String _airline = 'Lion Air';
 
   Future<void> _addTicket() async {
     String origin = _originController.text.trim();
@@ -91,6 +92,7 @@ class _TicketPageState extends State<TicketPage> {
         'flightDuration': int.parse(flightDuration),
         'departureTime': departureTime,
         'arrivalTime': arrivalTime,
+        'airline': _airline, // Tambahkan maskapai
         'status': 'Available',
         'createdAt': FieldValue.serverTimestamp(),
       });
@@ -122,6 +124,7 @@ class _TicketPageState extends State<TicketPage> {
     setState(() {
       _flightType = 'Sekali Jalan';
       _flightClass = 'Ekonomi';
+      _airline = 'Lion Air'; // Reset airline to default
     });
   }
 
@@ -149,10 +152,33 @@ class _TicketPageState extends State<TicketPage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              DropdownButtonFormField<String>(
+                value: _airline,
+                items: const [
+                  DropdownMenuItem(value: 'Lion Air', child: Text('Lion Air')),
+                  DropdownMenuItem(
+                      value: 'Garuda Indonesia',
+                      child: Text('Garuda Indonesia')),
+                  DropdownMenuItem(value: 'AirAsia', child: Text('AirAsia')),
+                  DropdownMenuItem(value: 'Citilink', child: Text('Citilink')),
+                  DropdownMenuItem(
+                      value: 'Batik Air', child: Text('Batik Air')),
+                ],
+                onChanged: (value) {
+                  setState(() {
+                    _airline = value!;
+                  });
+                },
+                decoration: const InputDecoration(
+                  labelText: 'Maskapai Penerbangan',
+                  border: OutlineInputBorder(),
+                ),
+              ),
+              const SizedBox(height: 16),
               TextField(
                 controller: _originController,
                 decoration: const InputDecoration(
-                  labelText: 'Bandara Asal',
+                  labelText: 'Kota Asal',
                   border: OutlineInputBorder(),
                 ),
               ),
@@ -168,7 +194,7 @@ class _TicketPageState extends State<TicketPage> {
               TextField(
                 controller: _destinationController,
                 decoration: const InputDecoration(
-                  labelText: 'Bandara Tujuan',
+                  labelText: 'Kota Tujuan',
                   border: OutlineInputBorder(),
                 ),
               ),
@@ -305,7 +331,7 @@ class _TicketPageState extends State<TicketPage> {
                 controller: _baggageInfoController,
                 keyboardType: TextInputType.number,
                 decoration: const InputDecoration(
-                  labelText: 'Informasi Bagasi (kg)',
+                  labelText: 'Informasi Maksimal Bagasi (kg)',
                   border: OutlineInputBorder(),
                 ),
               ),
