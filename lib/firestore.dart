@@ -70,6 +70,7 @@ class FirestoreService {
       QuerySnapshot snapshot = await firestore.collection('tickets').get();
       List<Map<String, dynamic>> tickets = snapshot.docs.map((doc) {
         return {
+          'airline': doc['airline'] ?? 'Unknown Airline',
           'arrivalTime': doc['arrivalTime'] ?? 'Unknown Arrival',
           'baggageInfo': doc['baggageInfo'] ?? 0,
           'createdAt': doc['createdAt'],
@@ -146,6 +147,7 @@ class FirestoreService {
           'price': doc['price'] ?? 0,
           'seatCount': doc['seatCount'] ?? 0,
           'status': doc['status'] ?? 'Unknown Status',
+          'airline': doc['airline'] ?? 'Unknown Airline',
         };
       }).toList();
 
