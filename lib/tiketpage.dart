@@ -3,6 +3,7 @@ import 'package:intl/intl.dart';
 import 'firestore.dart';
 import 'home_screen_user.dart';
 import 'profile_page.dart';
+import 'detailtiket.dart';
 
 class TicketPage extends StatefulWidget {
   final String userId;
@@ -350,71 +351,54 @@ class _TicketPageState extends State<TicketPage> {
                         itemCount: _tickets.length,
                         itemBuilder: (context, index) {
                           var ticket = _tickets[index];
-
-                          // Tambahkan logika filtering berdasarkan tipe kepergian
-                          if (_tipeKepergian == 'Sekali Jalan' &&
-                              ticket['flightType'] != 'Sekali Jalan') {
-                            return SizedBox
-                                .shrink(); // Tidak menampilkan tiket jika tipe kepergian tidak sesuai
-                          } else if (_tipeKepergian == 'Pulang Pergi' &&
-                              ticket['flightType'] != 'Pulang Pergi') {
-                            return SizedBox
-                                .shrink(); // Tidak menampilkan tiket jika tipe kepergian tidak sesuai
-                          }
-
-                          print('Ticket ${index + 1}:');
-                          print(
-                              'Flight Type: ${ticket['flightType'] ?? 'Unknown Flight Type'}');
-                          print('airline: ${ticket['airline'] ?? 'Unknown'}');
-                          print(
-                              'Departure Time: ${ticket['departureTime'] ?? 'Unknown'}');
-                          print(
-                              'Arrival Time: ${ticket['arrivalTime'] ?? 'Unknown'}');
-                          print(
-                              'Flight Duration: ${ticket['flightDuration'] ?? 0}');
-                          print('Price: ${formatRupiah(ticket['price'] ?? 0)}');
-                          print(
-                              'Flight Class: ${ticket['flightClass'] ?? 'Unknown Class'}');
-                          print(
-                              'Origin: ${ticket['originCode'] ?? 'Unknown Origin'}');
-                          print(
-                              'Destination: ${ticket['destinationCode'] ?? 'Unknown Destination'}');
-                          print('---');
-
-                          if (_tipeKepergian == 'Sekali Jalan') {
-                            return FlightCardOneWay(
-                              flightType:
-                                  ticket['flightType'] ?? 'Unknown Flight Type',
-                              airline: ticket['airline'] ?? 'Unknown',
-                              departureTime:
-                                  ticket['departureTime'] ?? 'Unknown',
-                              arrivalTime: ticket['arrivalTime'] ?? 'Unknown',
-                              flightDuration: ticket['flightDuration'] ?? 0,
-                              price: formatRupiah(ticket['price'] ?? 0),
-                              flightClass:
-                                  ticket['flightClass'] ?? 'Unknown Class',
-                              origin: ticket['originCode'] ?? 'Unknown Origin',
-                              destination: ticket['destinationCode'] ??
-                                  'Unknown Destination',
-                            );
-                          } else if (_tipeKepergian == 'Pulang Pergi') {
-                            return FlightCardTwoWay(
-                              flightType:
-                                  ticket['flightType'] ?? 'Unknown Flight Type',
-                              departureTime:
-                                  ticket['departureTime'] ?? 'Unknown',
-                              arrivalTime: ticket['arrivalTime'] ?? 'Unknown',
-                              flightDuration: ticket['flightDuration'] ?? 0,
-                              price: formatRupiah(ticket['price'] ?? 0),
-                              flightClass:
-                                  ticket['flightClass'] ?? 'Unknown Class',
-                              origin: ticket['originCode'] ?? 'Unknown Origin',
-                              destination: ticket['destinationCode'] ??
-                                  'Unknown Destination',
-                              airline: ticket['airline'] ?? 'Unknowns',
-                            );
-                          }
-                          return null;
+                          return GestureDetector(
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) =>
+                                      DetailTiketPage(ticket: ticket),
+                                ),
+                              );
+                            },
+                            child: _tipeKepergian == 'Sekali Jalan'
+                                ? FlightCardOneWay(
+                                    flightType: ticket['flightType'] ??
+                                        'Unknown Flight Type',
+                                    airline: ticket['airline'] ?? 'Unknown',
+                                    departureTime:
+                                        ticket['departureTime'] ?? 'Unknown',
+                                    arrivalTime:
+                                        ticket['arrivalTime'] ?? 'Unknown',
+                                    flightDuration:
+                                        ticket['flightDuration'] ?? 0,
+                                    price: formatRupiah(ticket['price'] ?? 0),
+                                    flightClass: ticket['flightClass'] ??
+                                        'Unknown Class',
+                                    origin: ticket['originCode'] ??
+                                        'Unknown Origin',
+                                    destination: ticket['destinationCode'] ??
+                                        'Unknown Destination',
+                                  )
+                                : FlightCardTwoWay(
+                                    flightType: ticket['flightType'] ??
+                                        'Unknown Flight Type',
+                                    departureTime:
+                                        ticket['departureTime'] ?? 'Unknown',
+                                    arrivalTime:
+                                        ticket['arrivalTime'] ?? 'Unknown',
+                                    flightDuration:
+                                        ticket['flightDuration'] ?? 0,
+                                    price: formatRupiah(ticket['price'] ?? 0),
+                                    flightClass: ticket['flightClass'] ??
+                                        'Unknown Class',
+                                    origin: ticket['originCode'] ??
+                                        'Unknown Origin',
+                                    destination: ticket['destinationCode'] ??
+                                        'Unknown Destination',
+                                    airline: ticket['airline'] ?? 'Unknowns',
+                                  ),
+                          );
                         },
                       ),
               ),
