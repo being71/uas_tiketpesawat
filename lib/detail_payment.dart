@@ -5,9 +5,11 @@ class DetailPaymentPage extends StatefulWidget {
   final Map<String, dynamic> ticket;
   final List<Map<String, String>> passengers;
 
-  const DetailPaymentPage(
-      {required this.ticket, required this.passengers, Key? key})
-      : super(key: key);
+  const DetailPaymentPage({
+    required this.ticket,
+    required this.passengers,
+    Key? key,
+  }) : super(key: key);
 
   @override
   State<DetailPaymentPage> createState() => _DetailPaymentPageState();
@@ -19,14 +21,64 @@ class _DetailPaymentPageState extends State<DetailPaymentPage> {
 
   Future<void> _saveToFirebase() async {
     try {
+      // Ambil ID tiket dari data yang dikirimkan
+      final ticketId = widget.ticket['id'];
+      print('Ticket ID: $ticketId');
+
+      if (ticketId == null || ticketId.isEmpty) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Ticket ID tidak ditemukan.')),
+        );
+        return;
+      }
+
+      // Referensi dokumen tiket
+      DocumentReference ticketDoc =
+          firestore.collection('tickets').doc(ticketId);
+
+      // Ambil data tiket dari database
+      DocumentSnapshot ticketSnapshot = await ticketDoc.get();
+
+      if (!ticketSnapshot.exists) {
+        print('Dokumen tiket tidak ditemukan untuk ID: $ticketId');
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Dokumen tiket tidak ditemukan.')),
+        );
+        return;
+      }
+
+      // Ambil nilai seatCount
+      int currentSeatCount = ticketSnapshot.get('seatCount');
+      int seatsPurchased = widget.passengers.length;
+      int updatedSeatCount = currentSeatCount - seatsPurchased;
+
+      if (updatedSeatCount < 0) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Jumlah kursi tidak mencukupi untuk pesanan ini.'),
+          ),
+        );
+        return;
+      }
+
+      // Simpan data pemesanan ke koleksi "booked_tickets"
       await firestore.collection('booked_tickets').add({
-        'ticket': widget.ticket,
+        'ticketId': ticketId,
         'passengers': widget.passengers,
         'paymentMethod': selectedPaymentMethod,
         'status': 'Booked',
         'timestamp': FieldValue.serverTimestamp(),
       });
 
+      // Update seatCount dan status tiket
+      Map<String, dynamic> ticketUpdateData = {'seatCount': updatedSeatCount};
+      if (updatedSeatCount == 0) {
+        ticketUpdateData['status'] = 'Full';
+      }
+
+      await ticketDoc.update(ticketUpdateData);
+
+      // Tampilkan pesan sukses
       showDialog(
         context: context,
         builder: (context) {
@@ -36,8 +88,8 @@ class _DetailPaymentPageState extends State<DetailPaymentPage> {
             actions: [
               TextButton(
                 onPressed: () {
-                  Navigator.pop(context);
-                  Navigator.pop(context);
+                  Navigator.pop(context); // Tutup dialog
+                  Navigator.pop(context); // Kembali ke halaman sebelumnya
                 },
                 child: const Text('OK'),
               ),
@@ -46,6 +98,7 @@ class _DetailPaymentPageState extends State<DetailPaymentPage> {
         },
       );
     } catch (e) {
+      // Tampilkan pesan kesalahan jika terjadi error
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Terjadi kesalahan: $e')),
       );
@@ -63,7 +116,7 @@ class _DetailPaymentPageState extends State<DetailPaymentPage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Ticket details
+            // Detail Tiket
             Card(
               elevation: 4,
               shape: RoundedRectangleBorder(
@@ -125,7 +178,7 @@ class _DetailPaymentPageState extends State<DetailPaymentPage> {
               ),
             ),
             const SizedBox(height: 16),
-            // Passenger details
+            // Detail Penumpang
             Card(
               elevation: 4,
               shape: RoundedRectangleBorder(
@@ -170,7 +223,7 @@ class _DetailPaymentPageState extends State<DetailPaymentPage> {
               ),
             ),
             const SizedBox(height: 16),
-            // Payment details
+            // Detail Pembayaran
             Card(
               elevation: 4,
               shape: RoundedRectangleBorder(
@@ -223,7 +276,7 @@ class _DetailPaymentPageState extends State<DetailPaymentPage> {
               ),
             ),
             const SizedBox(height: 24),
-            // Payment button
+            // Tombol Bayar
             Center(
               child: ElevatedButton(
                 style: ElevatedButton.styleFrom(
@@ -234,15 +287,15 @@ class _DetailPaymentPageState extends State<DetailPaymentPage> {
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(16),
                   ),
-                  backgroundColor: Colors.white,
+                  backgroundColor: Colors.blue,
                 ),
                 onPressed: _saveToFirebase,
-                child: Text(
+                child: const Text(
                   'Bayar Sekarang',
                   style: TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
-                    color: Colors.blue,
+                    color: Colors.white,
                   ),
                 ),
               ),
