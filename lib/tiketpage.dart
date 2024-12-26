@@ -96,6 +96,9 @@ class _TicketPageState extends State<TicketPage> {
     print("Tipe Kepergian: $_tipeKepergian");
     print("Kelas Penerbangan: $_kelasPenerbangan");
 
+// Ambil jumlah penumpang dari controller
+    int jumlahPenumpang = int.parse(_penumpangController.text);
+
 // Parse rentang harga dari dropdown
     List<String> hargaRange = _filterHarga!.split('-');
     int minHarga = int.parse(hargaRange[0]);
@@ -116,8 +119,15 @@ class _TicketPageState extends State<TicketPage> {
         maxHarga: maxHarga.toString(),
       );
 
+// Filter tiket berdasarkan jumlah penumpang dan seatCount
+      List<Map<String, dynamic>> filteredTickets = tickets.where((ticket) {
+        int seatCount = int.parse(ticket['seatCount'] ?? '0');
+        return seatCount >=
+            jumlahPenumpang; // Hanya tampilkan tiket jika seatCount cukup
+      }).toList();
+
       setState(() {
-        _tickets = tickets;
+        _tickets = filteredTickets;
       });
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
