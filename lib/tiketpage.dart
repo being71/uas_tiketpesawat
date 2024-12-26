@@ -328,7 +328,7 @@ class _TicketPageState extends State<TicketPage> {
               // Daftar Penerbangan (Flight List)
               Container(
                 decoration: BoxDecoration(
-                  color: Colors.grey,
+                  color: Colors.blueAccent,
                   borderRadius: BorderRadius.circular(12.0),
                   boxShadow: [
                     BoxShadow(
@@ -609,7 +609,15 @@ class FlightCardOneWay extends StatelessWidget {
                 ),
               ),
               ElevatedButton(
-                onPressed: () {},
+                onPressed: () {
+                  // Navigate to CheckoutPage
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => CheckoutPage(ticket: ticket),
+                    ),
+                  );
+                },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.white,
                   shape: RoundedRectangleBorder(
