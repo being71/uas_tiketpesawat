@@ -1,4 +1,3 @@
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'firestore.dart';
@@ -6,6 +5,10 @@ import 'home_screen_user.dart';
 import 'profile_page.dart';
 
 class TicketPage extends StatefulWidget {
+  final String userId;
+
+  const TicketPage({required this.userId});
+
   @override
   _TicketPageState createState() => _TicketPageState();
 }
@@ -20,10 +23,10 @@ class _TicketPageState extends State<TicketPage> {
   final TextEditingController _penumpangController = TextEditingController();
   DateTime? _startDate;
   DateTime? _endDate;
-  int _selectedIndex = 0; // Index for the selected tab
 
-  String? _tipeKeberangkatan; // Dropdown value for Tipe Keberangkatan
+  String? _tipeKepergian; // Dropdown value for Tipe Kepergian
   String? _kelasPenerbangan; // Dropdown value for Kelas Penerbangan
+  String? _filterHarga;
 
   // Fetch tickets from Firestore
   Future<void> _fetchTickets() async {
@@ -76,8 +79,9 @@ class _TicketPageState extends State<TicketPage> {
         _penumpangController.text.isEmpty ||
         _startDate == null ||
         _endDate == null ||
-        _tipeKeberangkatan == null ||
-        _kelasPenerbangan == null) {
+        _tipeKepergian == null ||
+        _kelasPenerbangan == null ||
+        _filterHarga == null) {
       // Jika ada yang kosong, tampilkan pesan peringatan
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Semua kolom harus diisi')),
@@ -89,8 +93,13 @@ class _TicketPageState extends State<TicketPage> {
     print("Start Date: $_startDate");
     print("End Date: $_endDate");
     print("Jumlah Penumpang: ${_penumpangController.text}");
-    print("Tipe Keberangkatan: $_tipeKeberangkatan");
+    print("Tipe Kepergian: $_tipeKepergian");
     print("Kelas Penerbangan: $_kelasPenerbangan");
+
+// Parse rentang harga dari dropdown
+    List<String> hargaRange = _filterHarga!.split('-');
+    int minHarga = int.parse(hargaRange[0]);
+    int maxHarga = int.parse(hargaRange[1]);
 
     // Ambil data tiket berdasarkan kriteria pencarian
     try {
@@ -101,8 +110,10 @@ class _TicketPageState extends State<TicketPage> {
         penumpang: int.parse(_penumpangController.text),
         startDate: _startDate!,
         endDate: _endDate!,
-        tipeKeberangkatan: _tipeKeberangkatan!,
+        tipeKepergian: _tipeKepergian!,
         kelasPenerbangan: _kelasPenerbangan!,
+        minHarga: minHarga.toString(),
+        maxHarga: maxHarga.toString(),
       );
 
       setState(() {
@@ -205,7 +216,7 @@ class _TicketPageState extends State<TicketPage> {
                     children: [
                       Expanded(
                         child: DropdownButtonFormField<String>(
-                          value: _tipeKeberangkatan,
+                          value: _tipeKepergian,
                           items: const [
                             DropdownMenuItem(
                               value: "Sekali Jalan",
@@ -218,12 +229,12 @@ class _TicketPageState extends State<TicketPage> {
                           ],
                           onChanged: (value) {
                             setState(() {
-                              _tipeKeberangkatan = value;
+                              _tipeKepergian = value;
                             });
                           },
                           decoration: const InputDecoration(
                             border: OutlineInputBorder(),
-                            labelText: 'Tipe Keberangkatan',
+                            labelText: 'Tipe Kepergian',
                           ),
                         ),
                       ),
@@ -252,7 +263,37 @@ class _TicketPageState extends State<TicketPage> {
                           },
                           decoration: const InputDecoration(
                             border: OutlineInputBorder(),
-                            labelText: 'Kelas Penerbangan',
+                            labelText: 'Kelas\nPenerbangan',
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  // Filter harga
+                  const SizedBox(height: 15),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: DropdownButtonFormField<String>(
+                          value: _filterHarga,
+                          items: const [
+                            DropdownMenuItem(
+                              value: "100000-1000000",
+                              child: Text("100 rb - 1 juta"),
+                            ),
+                            DropdownMenuItem(
+                              value: "1000000-5000000",
+                              child: Text("1 juta - 5 juta"),
+                            ),
+                          ],
+                          onChanged: (value) {
+                            setState(() {
+                              _filterHarga = value;
+                            });
+                          },
+                          decoration: const InputDecoration(
+                            border: OutlineInputBorder(),
+                            labelText: 'Filter Harga',
                           ),
                         ),
                       ),
@@ -321,44 +362,13 @@ class _TicketPageState extends State<TicketPage> {
       ),
       // Bottom Navigation Bar
       bottomNavigationBar: BottomNavigationBar(
-        currentIndex: _selectedIndex, // Simpan indeks tab yang dipilih
-        onTap: (index) {
-          setState(() {
-            _selectedIndex = index;
-          });
-
-          switch (index) {
-            case 0:
-              Navigator.pushReplacement(
-                context,
-                MaterialPageRoute(
-                    builder: (context) => HomeScreenUser(
-                        userId: FirebaseAuth.instance.currentUser!.uid)),
-              );
-              break;
-            case 1:
-            /*Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (context) => PesananPage()),
-        );
-        break;*/
-            case 2:
-              Navigator.pushReplacement(
-                context,
-                MaterialPageRoute(
-                    builder: (context) => ProfilePage(
-                        userId: FirebaseAuth.instance.currentUser!.uid)),
-              );
-              break;
-          }
-        },
         items: const [
           BottomNavigationBarItem(
             icon: Icon(Icons.home),
             label: 'Home',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.receipt_long),
+            icon: Icon(Icons.receipt),
             label: 'Pesanan',
           ),
           BottomNavigationBarItem(
@@ -366,6 +376,27 @@ class _TicketPageState extends State<TicketPage> {
             label: 'Profil',
           ),
         ],
+        onTap: (index) {
+          if (index == 0) {
+            // Navigasi ke halaman Home
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(
+                builder: (context) => HomeScreenUser(userId: widget.userId),
+              ),
+            );
+          } else if (index == 1) {
+            // Navigasi ke halaman Pesanan (belum diimplementasikan)
+          } else if (index == 2) {
+            // Tetap di halaman Profil
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(
+                builder: (context) => ProfilePage(userId: widget.userId),
+              ),
+            );
+          }
+        },
       ),
     );
   }

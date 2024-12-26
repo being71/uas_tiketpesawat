@@ -47,8 +47,9 @@ class HomeScreenUser extends StatelessWidget {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) =>
-                              TicketPage(), // Pindah ke TicketPage
+                          builder: (context) => TicketPage(
+                            userId: 'user.uid',
+                          ), // Pindah ke TicketPage
                         ),
                       );
                     },

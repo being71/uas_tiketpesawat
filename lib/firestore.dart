@@ -97,15 +97,16 @@ class FirestoreService {
   }
 
   // Fungsi untuk mencari tiket berdasarkan kriteria pencarian
-  Future<List<Map<String, dynamic>>> getTicketsBySearch({
-    required String asal,
-    required String tujuan,
-    required int penumpang,
-    required DateTime startDate,
-    required DateTime endDate,
-    required String tipeKeberangkatan,
-    required String kelasPenerbangan,
-  }) async {
+  Future<List<Map<String, dynamic>>> getTicketsBySearch(
+      {required String asal,
+      required String tujuan,
+      required int penumpang,
+      required DateTime startDate,
+      required DateTime endDate,
+      required String tipeKepergian,
+      required String kelasPenerbangan,
+      required String minHarga,
+      required String maxHarga}) async {
     try {
       Query query = firestore.collection('tickets');
 
@@ -113,13 +114,17 @@ class FirestoreService {
       query = query
           .where('origin', isEqualTo: asal)
           .where('destination', isEqualTo: tujuan)
-          .where('flightType', isEqualTo: tipeKeberangkatan)
+          .where('flightType', isEqualTo: tipeKepergian)
           .where('flightClass', isEqualTo: kelasPenerbangan);
 
-      // Filter berdasarkan tanggal keberangkatan
+      // Filter berdasarkan tanggal Kepergian
       query = query
           .where('date', isGreaterThanOrEqualTo: startDate)
           .where('date', isLessThanOrEqualTo: endDate);
+
+      query = query
+          .where('price', isGreaterThanOrEqualTo: int.parse(minHarga))
+          .where('price', isLessThanOrEqualTo: int.parse(maxHarga));
 
       // Ambil tiket sesuai kriteria
       QuerySnapshot snapshot = await query.get();
