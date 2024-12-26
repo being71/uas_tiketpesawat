@@ -95,6 +95,12 @@ class TicketDetailPage extends StatelessWidget {
                 ),
                 const SizedBox(height: 8),
                 Text(
+                  "Maskapai: ${ticket['airline']}", // Menampilkan nama maskapai
+                  style: const TextStyle(
+                      fontSize: 18, fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 8),
+                Text(
                   "Tanggal Pergi: $formattedDate", // Display the formatted departure date
                   style: const TextStyle(fontSize: 16),
                 ),

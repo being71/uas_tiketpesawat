@@ -3,6 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:intl/intl.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:uas_tiketpesawat/login.dart';
+import 'package:uas_tiketpesawat/pedapatan_screen.dart';
 import 'package:uas_tiketpesawat/ticket_list_page.dart';
 import 'package:uas_tiketpesawat/user_list.dart';
 import 'ticket_detail_page.dart';
@@ -16,12 +17,43 @@ class HomeScreenAdmin extends StatefulWidget {
 
 class _HomeScreenAdminState extends State<HomeScreenAdmin> {
   int _currentIndex = 0;
+  double totalPendapatan = 0;
+  int totalTicketsSold = 0;
 
   // Function to get the number of users from Firestore
   Future<int> _getUserCount() async {
     QuerySnapshot snapshot =
         await FirebaseFirestore.instance.collection('users').get();
     return snapshot.docs.length;
+  }
+
+  // Function to calculate total revenue from bookings
+  Future<void> _calculateRevenue() async {
+    // Query the bookings collection
+    QuerySnapshot snapshot =
+        await FirebaseFirestore.instance.collection('bookings').get();
+
+    double total = 0;
+    int soldTickets = 0;
+
+    // Loop through all the bookings to calculate the total revenue and total tickets sold
+    for (var doc in snapshot.docs) {
+      var data = doc.data() as Map<String, dynamic>;
+
+      // Sum the totalPrice to get the total revenue
+      total += data['totalPrice'] ?? 0;
+
+      // Check the ticketId and count tickets if available
+      if (data['ticketId'] != null) {
+        soldTickets += 1; // Count the ticket as sold
+      }
+    }
+
+    // Update the state to reflect the calculated values
+    setState(() {
+      totalPendapatan = total;
+      totalTicketsSold = soldTickets;
+    });
   }
 
   // Helper function to format the timestamp fields
@@ -56,6 +88,12 @@ class _HomeScreenAdminState extends State<HomeScreenAdmin> {
     } catch (e) {
       print("Logout failed: $e");
     }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _calculateRevenue(); // Call the function to calculate total revenue and tickets sold
   }
 
   @override
@@ -114,38 +152,46 @@ class _HomeScreenAdminState extends State<HomeScreenAdmin> {
                     );
                   },
                 ),
+                // Card for "Tiket Terjual"
                 Card(
                   elevation: 5,
                   child: Padding(
                     padding: const EdgeInsets.all(16.0),
                     child: Column(
-                      children: const [
-                        Icon(Icons.confirmation_number, size: 40),
-                        SizedBox(height: 8),
-                        Text("Tiket Terjual",
+                      children: [
+                        const Icon(Icons.confirmation_number, size: 40),
+                        const SizedBox(height: 8),
+                        const Text("Tiket Terjual",
                             style: TextStyle(fontWeight: FontWeight.bold)),
-                        SizedBox(height: 4),
-                        Text("500", style: TextStyle(fontSize: 24)),
+                        const SizedBox(height: 4),
+                        Text(
+                          "$totalTicketsSold", // Display the number of tickets sold
+                          style: const TextStyle(fontSize: 24),
+                        ),
                       ],
                     ),
                   ),
                 ),
+                // Card for "Pendapatan"
                 Card(
                   elevation: 5,
                   child: Padding(
                     padding: const EdgeInsets.all(16.0),
                     child: Column(
-                      children: const [
-                        Icon(Icons.attach_money, size: 40),
-                        SizedBox(height: 8),
-                        Text("Pendapatan",
+                      children: [
+                        const Icon(Icons.attach_money, size: 40),
+                        const SizedBox(height: 8),
+                        const Text("Pendapatan",
                             style: TextStyle(fontWeight: FontWeight.bold)),
-                        SizedBox(height: 4),
-                        Text("Rp 50.000", style: TextStyle(fontSize: 24)),
+                        const SizedBox(height: 4),
+                        Text(
+                          "Rp ${totalPendapatan.toStringAsFixed(0)}",
+                          style: const TextStyle(fontSize: 24),
+                        ),
                       ],
                     ),
                   ),
-                ),
+                )
               ],
             ),
             const SizedBox(height: 20),
@@ -221,6 +267,11 @@ class _HomeScreenAdminState extends State<HomeScreenAdmin> {
               break;
             case 3:
               // Navigate to Pendapatan Screen
+              // Navigate to User List Page
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => PendapatanScreen()),
+              );
               break;
           }
         },
@@ -314,6 +365,10 @@ class _HomeScreenAdminState extends State<HomeScreenAdmin> {
               ],
             ),
             const Divider(height: 20),
+            Text(
+              "Maskapai: ${ticket['airline']}", // Menampilkan nama maskapai
+              style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+            ),
             // Additional ticket info
             Text(
               "Tipe Penerbangan: ${ticket['flightType']}",

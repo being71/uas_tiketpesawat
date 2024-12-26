@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:intl/intl.dart';
 
 class EditTicketPage extends StatefulWidget {
   final String ticketId;
@@ -22,6 +23,7 @@ class _EditTicketPageState extends State<EditTicketPage> {
   late TextEditingController _flightTypeController;
   late TextEditingController _flightClassController;
   late TextEditingController _baggageInfoController;
+  late TextEditingController _airlineController; // Controller untuk Airline
 
   @override
   void initState() {
@@ -41,6 +43,8 @@ class _EditTicketPageState extends State<EditTicketPage> {
     _flightTypeController = TextEditingController();
     _flightClassController = TextEditingController();
     _baggageInfoController = TextEditingController();
+    _airlineController =
+        TextEditingController(); // Inisialisasi controller airline
   }
 
   Future<void> _fetchTicketData() async {
@@ -55,18 +59,34 @@ class _EditTicketPageState extends State<EditTicketPage> {
       _originController.text = ticket['origin'];
       _destinationController.text = ticket['destination'];
       _priceController.text = ticket['price'].toString();
-      _dateController.text = ticket['date'];
+
+      // Periksa jika 'date' adalah Timestamp
+      if (ticket['date'] is Timestamp) {
+        Timestamp timestamp = ticket['date'];
+        _dateController.text = DateFormat('yyyy-MM-dd')
+            .format(timestamp.toDate()); // Format tanggal
+      } else if (ticket['date'] is String) {
+        _dateController.text =
+            ticket['date']; // Jika sudah String, langsung pakai
+      }
+
       _flightDurationController.text = ticket['flightDuration'].toString();
       _departureTimeController.text = ticket['departureTime'];
       _arrivalTimeController.text = ticket['arrivalTime'];
       _flightTypeController.text = ticket['flightType'];
       _flightClassController.text = ticket['flightClass'];
       _baggageInfoController.text = ticket['baggageInfo'].toString();
+      _airlineController.text = ticket['airline']; // Ambil data airline
     }
   }
 
   Future<void> _updateTicket() async {
     if (_formKey.currentState!.validate()) {
+      DateTime? selectedDate;
+      if (_dateController.text.isNotEmpty) {
+        selectedDate = DateFormat('yyyy-MM-dd').parse(_dateController.text);
+      }
+
       await FirebaseFirestore.instance
           .collection('tickets')
           .doc(widget.ticketId)
@@ -74,13 +94,14 @@ class _EditTicketPageState extends State<EditTicketPage> {
         'origin': _originController.text,
         'destination': _destinationController.text,
         'price': double.tryParse(_priceController.text) ?? 0.0,
-        'date': _dateController.text,
+        'date': selectedDate != null ? Timestamp.fromDate(selectedDate) : null,
         'flightDuration': int.tryParse(_flightDurationController.text) ?? 0,
         'departureTime': _departureTimeController.text,
         'arrivalTime': _arrivalTimeController.text,
         'flightType': _flightTypeController.text,
         'flightClass': _flightClassController.text,
         'baggageInfo': double.tryParse(_baggageInfoController.text) ?? 0.0,
+        'airline': _airlineController.text, // Update airline
       });
 
       ScaffoldMessenger.of(context).showSnackBar(
@@ -101,6 +122,7 @@ class _EditTicketPageState extends State<EditTicketPage> {
     _flightTypeController.dispose();
     _flightClassController.dispose();
     _baggageInfoController.dispose();
+    _airlineController.dispose(); // Dispose controller airline
     super.dispose();
   }
 
@@ -108,7 +130,7 @@ class _EditTicketPageState extends State<EditTicketPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Edit Tiket'),
+        title: Text('Edit Tiket'),
         centerTitle: true,
       ),
       body: Padding(
@@ -203,6 +225,14 @@ class _EditTicketPageState extends State<EditTicketPage> {
                 keyboardType: TextInputType.number,
                 validator: (value) =>
                     value!.isEmpty ? 'Harap masukkan informasi bagasi' : null,
+              ),
+              const SizedBox(height: 8),
+              // Airline
+              TextFormField(
+                controller: _airlineController,
+                decoration: const InputDecoration(labelText: 'Airline'),
+                validator: (value) =>
+                    value!.isEmpty ? 'Harap masukkan nama maskapai' : null,
               ),
               const SizedBox(height: 20),
               // Save Button

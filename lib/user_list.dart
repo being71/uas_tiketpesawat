@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:uas_tiketpesawat/pedapatan_screen.dart';
 import 'home_screen_admin.dart'; // Import the HomeScreenAdmin
 import 'ticket_list_page.dart'; // Import TicketListPage
 import 'user_list.dart'; // Import UserListPage (if needed)
@@ -75,7 +76,10 @@ class _UserListPageState extends State<UserListPage> {
               break;
             case 3:
               // Navigate to Pendapatan Screen
-              // Add your Pendapatan Screen navigation logic here
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => PendapatanScreen()),
+              );
               break;
           }
         },
