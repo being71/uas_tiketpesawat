@@ -351,54 +351,81 @@ class _TicketPageState extends State<TicketPage> {
                         itemCount: _tickets.length,
                         itemBuilder: (context, index) {
                           var ticket = _tickets[index];
-                          return GestureDetector(
-                            onTap: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) =>
-                                      DetailTiketPage(ticket: ticket),
-                                ),
-                              );
-                            },
-                            child: _tipeKepergian == 'Sekali Jalan'
-                                ? FlightCardOneWay(
-                                    flightType: ticket['flightType'] ??
-                                        'Unknown Flight Type',
-                                    airline: ticket['airline'] ?? 'Unknown',
-                                    departureTime:
-                                        ticket['departureTime'] ?? 'Unknown',
-                                    arrivalTime:
-                                        ticket['arrivalTime'] ?? 'Unknown',
-                                    flightDuration:
-                                        ticket['flightDuration'] ?? 0,
-                                    price: formatRupiah(ticket['price'] ?? 0),
-                                    flightClass: ticket['flightClass'] ??
-                                        'Unknown Class',
-                                    origin: ticket['originCode'] ??
-                                        'Unknown Origin',
-                                    destination: ticket['destinationCode'] ??
-                                        'Unknown Destination',
-                                  )
-                                : FlightCardTwoWay(
-                                    flightType: ticket['flightType'] ??
-                                        'Unknown Flight Type',
-                                    departureTime:
-                                        ticket['departureTime'] ?? 'Unknown',
-                                    arrivalTime:
-                                        ticket['arrivalTime'] ?? 'Unknown',
-                                    flightDuration:
-                                        ticket['flightDuration'] ?? 0,
-                                    price: formatRupiah(ticket['price'] ?? 0),
-                                    flightClass: ticket['flightClass'] ??
-                                        'Unknown Class',
-                                    origin: ticket['originCode'] ??
-                                        'Unknown Origin',
-                                    destination: ticket['destinationCode'] ??
-                                        'Unknown Destination',
-                                    airline: ticket['airline'] ?? 'Unknowns',
+
+                          // Tambahkan logika filtering berdasarkan tipe kepergian
+                          if (_tipeKepergian == 'Sekali Jalan' &&
+                              ticket['flightType'] != 'Sekali Jalan') {
+                            return SizedBox
+                                .shrink(); // Tidak menampilkan tiket jika tipe kepergian tidak sesuai
+                          } else if (_tipeKepergian == 'Pulang Pergi' &&
+                              ticket['flightType'] != 'Pulang Pergi') {
+                            return SizedBox
+                                .shrink(); // Tidak menampilkan tiket jika tipe kepergian tidak sesuai
+                          }
+
+                          // Menampilkan tiket yang sudah difilter berdasarkan tipe kepergian
+                          if (_tipeKepergian == 'Sekali Jalan') {
+                            return GestureDetector(
+                              onTap: () {
+                                // Navigasi ke halaman DetailTicketPage dengan mengirimkan seluruh ticket data
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) =>
+                                        DetailTiketPage(ticket: ticket),
                                   ),
-                          );
+                                );
+                              },
+                              child: FlightCardOneWay(
+                                flightType: ticket['flightType'] ??
+                                    'Unknown Flight Type',
+                                airline: ticket['airline'] ?? 'Unknown',
+                                departureTime:
+                                    ticket['departureTime'] ?? 'Unknown',
+                                arrivalTime: ticket['arrivalTime'] ?? 'Unknown',
+                                flightDuration: ticket['flightDuration'] ?? 0,
+                                price: formatRupiah(ticket['price'] ?? 0),
+                                flightClass:
+                                    ticket['flightClass'] ?? 'Unknown Class',
+                                origin:
+                                    ticket['originCode'] ?? 'Unknown Origin',
+                                destination: ticket['destinationCode'] ??
+                                    'Unknown Destination',
+                              ),
+                            );
+                          } else if (_tipeKepergian == 'Pulang Pergi') {
+                            return GestureDetector(
+                              onTap: () {
+                                // Navigasi ke halaman DetailTicketPage dengan mengirimkan seluruh ticket data
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) =>
+                                        DetailTiketPage(ticket: ticket),
+                                  ),
+                                );
+                              },
+                              child: FlightCardTwoWay(
+                                flightType: ticket['flightType'] ??
+                                    'Unknown Flight Type',
+                                departureTime:
+                                    ticket['departureTime'] ?? 'Unknown',
+                                arrivalTime: ticket['arrivalTime'] ?? 'Unknown',
+                                flightDuration: ticket['flightDuration'] ?? 0,
+                                price: formatRupiah(ticket['price'] ?? 0),
+                                flightClass:
+                                    ticket['flightClass'] ?? 'Unknown Class',
+                                origin:
+                                    ticket['originCode'] ?? 'Unknown Origin',
+                                destination: ticket['destinationCode'] ??
+                                    'Unknown Destination',
+                                airline: ticket['airline'] ?? 'Unknown',
+                              ),
+                            );
+                          }
+
+                          return SizedBox
+                              .shrink(); // Return an empty widget if no conditions are met
                         },
                       ),
               ),
