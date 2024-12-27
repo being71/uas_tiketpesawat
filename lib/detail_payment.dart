@@ -19,6 +19,11 @@ class _DetailPaymentPageState extends State<DetailPaymentPage> {
   String selectedPaymentMethod = 'Credit Card';
   final FirebaseFirestore firestore = FirebaseFirestore.instance;
 
+  double calculateTotalPrice() {
+    return widget.passengers.length *
+        double.parse(widget.ticket['price'].toString());
+  }
+
   Future<void> _saveToFirebase() async {
     try {
       // Ambil ID tiket dari data yang dikirimkan
@@ -61,11 +66,14 @@ class _DetailPaymentPageState extends State<DetailPaymentPage> {
         return;
       }
 
+      double totalPrice = calculateTotalPrice();
+
       // Simpan data pemesanan ke koleksi "booked_tickets"
       await firestore.collection('booked_tickets').add({
         'ticketId': ticketId,
         'passengers': widget.passengers,
         'paymentMethod': selectedPaymentMethod,
+        'totalPrice': totalPrice,
         'status': 'Booked',
         'timestamp': FieldValue.serverTimestamp(),
       });
@@ -107,6 +115,7 @@ class _DetailPaymentPageState extends State<DetailPaymentPage> {
 
   @override
   Widget build(BuildContext context) {
+    double totalPrice = calculateTotalPrice();
     return Scaffold(
       appBar: AppBar(
         title: const Text('Detail Pembayaran'),
@@ -252,7 +261,7 @@ class _DetailPaymentPageState extends State<DetailPaymentPage> {
                     ListTile(
                       leading: Icon(Icons.monetization_on, color: Colors.blue),
                       title: const Text('Total Harga'),
-                      subtitle: Text('Rp${widget.ticket['price']}'),
+                      subtitle: Text('Rp${totalPrice.toInt()}'),
                     ),
                     ListTile(
                       leading: Icon(Icons.payment, color: Colors.blue),
