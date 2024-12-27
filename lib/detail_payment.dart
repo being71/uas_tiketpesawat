@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'home_screen_user.dart';
 
 class DetailPaymentPage extends StatefulWidget {
   final Map<String, dynamic> ticket;
@@ -19,6 +21,11 @@ class _DetailPaymentPageState extends State<DetailPaymentPage> {
   String selectedPaymentMethod = 'Credit Card';
   final FirebaseFirestore firestore = FirebaseFirestore.instance;
 
+  Future<String?> _getUserId() async {
+    final user = FirebaseAuth.instance.currentUser;
+    return user?.uid;
+  }
+
   double calculateTotalPrice() {
     return widget.passengers.length *
         double.parse(widget.ticket['price'].toString());
@@ -26,10 +33,18 @@ class _DetailPaymentPageState extends State<DetailPaymentPage> {
 
   Future<void> _saveToFirebase() async {
     try {
+      // Ambil userId dari FirebaseAuth
+      final userId = await _getUserId();
+      if (userId == null || userId.isEmpty) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('User ID tidak ditemukan.')),
+        );
+        return;
+      }
+
       // Ambil ID tiket dari data yang dikirimkan
       final ticketId = widget.ticket['docId'];
       print('Ticket ID: $ticketId');
-
       if (ticketId == null || ticketId.isEmpty) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Ticket ID tidak ditemukan.')),
@@ -71,6 +86,7 @@ class _DetailPaymentPageState extends State<DetailPaymentPage> {
       // Simpan data pemesanan ke koleksi "booked_tickets"
       await firestore.collection('booked_tickets').add({
         'ticketId': ticketId,
+        'userId': userId,
         'passengers': widget.passengers,
         'paymentMethod': selectedPaymentMethod,
         'totalPrice': totalPrice,
@@ -96,8 +112,15 @@ class _DetailPaymentPageState extends State<DetailPaymentPage> {
             actions: [
               TextButton(
                 onPressed: () {
-                  Navigator.pop(context); // Tutup dialog
-                  Navigator.pop(context); // Kembali ke halaman sebelumnya
+                  // Check if userId is not null before navigating
+                  if (userId != null) {
+                    Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => HomeScreenUser(userId: userId!),
+                      ),
+                    );
+                  }
                 },
                 child: const Text('OK'),
               ),
@@ -136,7 +159,7 @@ class _DetailPaymentPageState extends State<DetailPaymentPage> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
+                    const Text(
                       'Detail Tiket Penerbangan',
                       style: TextStyle(
                         fontSize: 18,
@@ -146,33 +169,37 @@ class _DetailPaymentPageState extends State<DetailPaymentPage> {
                     ),
                     const Divider(thickness: 1),
                     ListTile(
-                      leading: Icon(Icons.airlines, color: Colors.blue),
+                      leading: const Icon(Icons.airlines, color: Colors.blue),
                       title: const Text('Maskapai'),
                       subtitle: Text(widget.ticket['airline']),
                     ),
                     ListTile(
-                      leading: Icon(Icons.flight_takeoff, color: Colors.blue),
+                      leading:
+                          const Icon(Icons.flight_takeoff, color: Colors.blue),
                       title: const Text('Keberangkatan'),
                       subtitle: Text(widget.ticket['departureTime']),
                     ),
                     ListTile(
-                      leading: Icon(Icons.flight_land, color: Colors.blue),
+                      leading:
+                          const Icon(Icons.flight_land, color: Colors.blue),
                       title: const Text('Kedatangan'),
                       subtitle: Text(widget.ticket['arrivalTime']),
                     ),
                     ListTile(
-                      leading: Icon(Icons.timer, color: Colors.blue),
+                      leading: const Icon(Icons.timer, color: Colors.blue),
                       title: const Text('Durasi Penerbangan'),
                       subtitle:
                           Text('${widget.ticket['flightDuration']} menit'),
                     ),
                     ListTile(
-                      leading: Icon(Icons.monetization_on, color: Colors.blue),
+                      leading:
+                          const Icon(Icons.monetization_on, color: Colors.blue),
                       title: const Text('Harga'),
                       subtitle: Text('Rp${widget.ticket['price']}'),
                     ),
                     ListTile(
-                      leading: Icon(Icons.location_on, color: Colors.blue),
+                      leading:
+                          const Icon(Icons.location_on, color: Colors.blue),
                       title: const Text('Asal'),
                       subtitle: Text(widget.ticket['origin'] +
                           ' (' +
@@ -180,8 +207,8 @@ class _DetailPaymentPageState extends State<DetailPaymentPage> {
                           ')'),
                     ),
                     ListTile(
-                      leading:
-                          Icon(Icons.location_on_outlined, color: Colors.blue),
+                      leading: const Icon(Icons.location_on_outlined,
+                          color: Colors.blue),
                       title: const Text('Tujuan'),
                       subtitle: Text(widget.ticket['destination'] +
                           ' (' +
@@ -204,7 +231,7 @@ class _DetailPaymentPageState extends State<DetailPaymentPage> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
+                    const Text(
                       'Detail Penumpang',
                       style: TextStyle(
                         fontSize: 18,
@@ -249,7 +276,7 @@ class _DetailPaymentPageState extends State<DetailPaymentPage> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
+                    const Text(
                       'Detail Pembayaran',
                       style: TextStyle(
                         fontSize: 18,
@@ -259,12 +286,13 @@ class _DetailPaymentPageState extends State<DetailPaymentPage> {
                     ),
                     const Divider(thickness: 1),
                     ListTile(
-                      leading: Icon(Icons.monetization_on, color: Colors.blue),
+                      leading:
+                          const Icon(Icons.monetization_on, color: Colors.blue),
                       title: const Text('Total Harga'),
                       subtitle: Text('Rp${totalPrice.toInt()}'),
                     ),
                     ListTile(
-                      leading: Icon(Icons.payment, color: Colors.blue),
+                      leading: const Icon(Icons.payment, color: Colors.blue),
                       title: const Text('Metode Pembayaran'),
                       subtitle: DropdownButton<String>(
                         value: selectedPaymentMethod,
