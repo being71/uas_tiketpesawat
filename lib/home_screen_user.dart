@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'firestore.dart';
 import 'tiketpage.dart';
+import 'profile_page.dart';
+import 'orderedticket.dart';
 
 class HomeScreenUser extends StatelessWidget {
   final String userId;
@@ -13,6 +15,7 @@ class HomeScreenUser extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    print("Accessing HomeScreenUser with userId: $userId");
     return Scaffold(
       body: SingleChildScrollView(
         child: Column(
@@ -151,7 +154,7 @@ class HomeScreenUser extends StatelessWidget {
         ),
       ),
 
-      // Bottom navigation bar
+      // Bottom Navigation Bar
       bottomNavigationBar: BottomNavigationBar(
         items: const [
           BottomNavigationBarItem(
@@ -167,6 +170,34 @@ class HomeScreenUser extends StatelessWidget {
             label: 'Profil',
           ),
         ],
+        onTap: (index) {
+          if (index == 0) {
+            // Navigasi ke halaman Home
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(
+                builder: (context) => HomeScreenUser(userId: userId),
+              ),
+            );
+          } else if (index == 1) {
+            // Navigasi ke halaman Pesanan
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(
+                builder: (context) =>
+                    OrderedTicketPage(userId: userId), // Gunakan userId
+              ),
+            );
+          } else if (index == 2) {
+            // Tetap di halaman Profil
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(
+                builder: (context) => ProfilePage(userId: userId),
+              ),
+            );
+          }
+        },
       ),
     );
   }

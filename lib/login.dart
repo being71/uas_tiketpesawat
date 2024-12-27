@@ -1,4 +1,3 @@
-// ignore_for_file: file_names
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:uas_tiketpesawat/home_screen_admin.dart';
@@ -44,13 +43,13 @@ class LoginPageState extends State<LoginPage> {
           String status = userData['status']; // Field status di Firestore
 
           if (status == 'user') {
-            // Navigasi ke HomeScreen
+            // Navigasi ke HomeScreenUser dan kirimkan user.uid
             if (mounted) {
               Navigator.pushAndRemoveUntil(
                 context,
                 MaterialPageRoute(
-                    builder: (context) => const HomeScreenUser(
-                          userId: 'user.uid',
+                    builder: (context) => HomeScreenUser(
+                          userId: user.uid, // Kirimkan user.uid yang valid
                         )),
                 (Route<dynamic> route) => false,
               );
