@@ -317,9 +317,13 @@ class _TicketPageState extends State<TicketPage> {
                   const SizedBox(height: 15),
                   ElevatedButton(
                     onPressed: _searchTickets, // Panggil fungsi pencarian
-                    child: const Text('Cari'),
+                    child: const Text(
+                      'Cari',
+                      style: TextStyle(color: Colors.white),
+                    ),
                     style: ElevatedButton.styleFrom(
                       minimumSize: const Size(double.infinity, 48),
+                      backgroundColor: Colors.blue, // Warna tombol biru
                     ),
                   )
                 ],
@@ -514,7 +518,7 @@ class FlightCardOneWay extends StatelessWidget {
       margin: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
       padding: const EdgeInsets.all(16.0),
       decoration: BoxDecoration(
-        color: Colors.grey.shade100,
+        color: const Color.fromARGB(255, 255, 255, 255),
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
@@ -535,12 +539,13 @@ class FlightCardOneWay extends StatelessWidget {
                 padding:
                     const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
                 decoration: BoxDecoration(
-                  color: Colors.grey.shade300,
+                  color: const Color.fromARGB(255, 0, 140, 255),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Text(
                   flightClass,
-                  style: const TextStyle(fontSize: 12, color: Colors.black54),
+                  style: const TextStyle(
+                      fontSize: 12, color: Color.fromARGB(255, 255, 255, 255)),
                 ),
               ),
               const SizedBox(height: 8.0),
@@ -619,14 +624,15 @@ class FlightCardOneWay extends StatelessWidget {
                   );
                 },
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.white,
+                  backgroundColor: Colors.blue, // Warna tombol biru
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(50),
                   ),
                 ),
                 child: const Text(
                   'Checkout',
-                  style: TextStyle(fontSize: 12),
+                  style: TextStyle(
+                      fontSize: 12, color: Colors.white), // Teks putih
                 ),
               ),
             ],
@@ -669,7 +675,7 @@ class FlightCardTwoWay extends StatelessWidget {
       margin: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
       padding: const EdgeInsets.all(16.0),
       decoration: BoxDecoration(
-        color: Colors.grey.shade100,
+        color: const Color.fromARGB(255, 255, 255, 255),
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
@@ -692,13 +698,14 @@ class FlightCardTwoWay extends StatelessWidget {
                     padding:
                         const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                     decoration: BoxDecoration(
-                      color: Colors.grey.shade300,
+                      color: const Color.fromARGB(255, 52, 140, 255),
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Text(
                       flightClass,
-                      style:
-                          const TextStyle(fontSize: 12, color: Colors.black54),
+                      style: const TextStyle(
+                          fontSize: 12,
+                          color: Color.fromARGB(255, 255, 255, 255)),
                     ),
                   ),
                 ],
@@ -847,14 +854,15 @@ class FlightCardTwoWay extends StatelessWidget {
                   );
                 },
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.white,
+                  backgroundColor: Colors.blue, // Warna tombol biru
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(50),
                   ),
                 ),
                 child: const Text(
                   'Checkout',
-                  style: TextStyle(fontSize: 12),
+                  style: TextStyle(
+                      fontSize: 12, color: Colors.white), // Teks putih
                 ),
               ),
             ],

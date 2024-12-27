@@ -13,14 +13,20 @@ class UserListPage extends StatefulWidget {
 }
 
 class _UserListPageState extends State<UserListPage> {
-  int _currentIndex = 0; // Track the selected index for BottomNavigationBar
+  int _currentIndex = 2; // Set index for the User List Page
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("User List"),
+        title: const Text(
+          "User List",
+          style: TextStyle(color: Colors.black),
+        ),
         centerTitle: true,
+        backgroundColor: Colors.white,
+        elevation: 1,
+        iconTheme: const IconThemeData(color: Colors.black),
       ),
       body: StreamBuilder<QuerySnapshot>(
         stream: FirebaseFirestore.instance
@@ -33,7 +39,12 @@ class _UserListPageState extends State<UserListPage> {
           }
 
           if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-            return const Center(child: Text("No users available."));
+            return const Center(
+              child: Text(
+                "No users available.",
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              ),
+            );
           }
 
           final users = snapshot.data!.docs;
@@ -101,8 +112,8 @@ class _UserListPageState extends State<UserListPage> {
             label: 'Pendapatan',
           ),
         ],
-        selectedItemColor: Colors.black,
-        unselectedItemColor: Colors.black,
+        selectedItemColor: Colors.blueAccent,
+        unselectedItemColor: Colors.grey,
       ),
     );
   }
@@ -111,7 +122,7 @@ class _UserListPageState extends State<UserListPage> {
     return Card(
       margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(16),
       ),
       elevation: 3,
       child: Padding(
@@ -128,33 +139,76 @@ class _UserListPageState extends State<UserListPage> {
                   style: const TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
+                    color: Colors.blueAccent,
                   ),
                 ),
-                Text(
-                  user['status'],
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                    color:
-                        user['status'] == 'admin' ? Colors.blue : Colors.green,
+                Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: user['status'] == 'admin'
+                        ? Colors.blueAccent.withOpacity(0.2)
+                        : Colors.green.withOpacity(0.2),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Text(
+                    user['status'],
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.bold,
+                      color: user['status'] == 'admin'
+                          ? Colors.blueAccent
+                          : Colors.green,
+                    ),
                   ),
                 ),
               ],
             ),
             const SizedBox(height: 8),
-            Text(
-              "Email: ${user['email']}",
-              style: const TextStyle(fontSize: 14),
+            Row(
+              children: [
+                const Icon(Icons.email, color: Colors.blueAccent, size: 20),
+                const SizedBox(width: 8),
+                Text(
+                  "Email: ${user['email']}",
+                  style: const TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.black,
+                  ),
+                ),
+              ],
             ),
             const SizedBox(height: 8),
-            Text(
-              "Phone: ${user['noTelp']}",
-              style: const TextStyle(fontSize: 14),
+            Row(
+              children: [
+                const Icon(Icons.phone, color: Colors.blueAccent, size: 20),
+                const SizedBox(width: 8),
+                Text(
+                  "Phone: ${user['noTelp']}",
+                  style: const TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.black,
+                  ),
+                ),
+              ],
             ),
             const SizedBox(height: 8),
-            Text(
-              "Created At: ${_formatTimestamp(user['createdAt'])}",
-              style: const TextStyle(fontSize: 14),
+            Row(
+              children: [
+                const Icon(Icons.calendar_today,
+                    color: Colors.blueAccent, size: 20),
+                const SizedBox(width: 8),
+                Text(
+                  "Created At: ${_formatTimestamp(user['createdAt'])}",
+                  style: const TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.black,
+                  ),
+                ),
+              ],
             ),
           ],
         ),

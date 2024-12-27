@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:intl/intl.dart';
-import 'package:uas_tiketpesawat/user_list.dart';
-import 'home_screen_admin.dart'; // Import your screens
+import 'home_screen_admin.dart';
 import 'ticket_list_page.dart';
 import 'user_list.dart';
 
@@ -12,7 +11,7 @@ class PendapatanScreen extends StatefulWidget {
 }
 
 class _PendapatanScreenState extends State<PendapatanScreen> {
-  int _currentIndex = 3; // Start with Pendapatan screen
+  int _currentIndex = 3;
   double totalPendapatan = 0;
 
   final List<Widget> _screens = [
@@ -26,13 +25,24 @@ class _PendapatanScreenState extends State<PendapatanScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Pendapatan'),
+        title: const Text(
+          'Pendapatan',
+          style: TextStyle(
+            color: Colors.black,
+            fontSize: 20,
+            fontFamily: 'Roboto',
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+        backgroundColor: Colors.white,
+        elevation: 0,
+        iconTheme: const IconThemeData(color: Colors.black),
       ),
       body: FutureBuilder<QuerySnapshot>(
         future: FirebaseFirestore.instance.collection('booked_tickets').get(),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
-            return Center(child: CircularProgressIndicator());
+            return const Center(child: CircularProgressIndicator());
           }
 
           if (snapshot.hasError) {
@@ -40,80 +50,144 @@ class _PendapatanScreenState extends State<PendapatanScreen> {
           }
 
           if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-            return Center(child: Text('Data tidak ditemukan'));
+            return const Center(child: Text('Data tidak ditemukan'));
           }
 
-          // Hitung total pendapatan
           totalPendapatan = 0;
           snapshot.data!.docs.forEach((doc) {
             var data = doc.data() as Map<String, dynamic>;
             totalPendapatan += data['totalPrice'] ?? 0;
           });
 
-          return ListView.builder(
-            itemCount: snapshot.data!.docs.length +
-                1, // Menambah 1 untuk header total pendapatan
-            itemBuilder: (context, index) {
-              if (index == 0) {
-                // Menampilkan total pendapatan di atas daftar
-                return Padding(
+          return SingleChildScrollView(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Padding(
                   padding: const EdgeInsets.all(16.0),
-                  child: Text(
-                    'Total Pendapatan: Rp ${totalPendapatan.toStringAsFixed(0)}',
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                  ),
-                );
-              }
-
-              var data =
-                  snapshot.data!.docs[index - 1].data() as Map<String, dynamic>;
-              var bookingDate = (data['timestamp'] as Timestamp).toDate();
-              var totalPrice = data['totalPrice'];
-              var paymentMethod = data['paymentMethod'];
-              var userId = data['userid'];
-              var ticketId = data['ticketId'];
-
-              // Format tanggal
-              String formattedDate =
-                  DateFormat('MMMM dd, yyyy').format(bookingDate);
-
-              return Card(
-                margin: EdgeInsets.symmetric(vertical: 8, horizontal: 16),
-                elevation: 4,
-                child: Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Tanggal Pemesanan: $formattedDate',
-                        style: TextStyle(fontSize: 16),
+                  child: Card(
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    elevation: 4,
+                    child: Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Center(
+                            child: Text(
+                              'Total Pendapatan',
+                              style: TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.w600,
+                                fontFamily: 'Roboto',
+                                color: Colors.blueAccent,
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          Center(
+                            child: Text(
+                              'Rp ${totalPendapatan.toStringAsFixed(0)}',
+                              style: const TextStyle(
+                                fontSize: 24,
+                                fontWeight: FontWeight.bold,
+                                fontFamily: 'Roboto',
+                                color: Colors.green,
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
-                      SizedBox(height: 8),
-                      Text(
-                        'Total Harga: Rp $totalPrice',
-                        style: TextStyle(fontSize: 16),
-                      ),
-                      SizedBox(height: 8),
-                      Text(
-                        'Metode Pembayaran: $paymentMethod',
-                        style: TextStyle(fontSize: 16),
-                      ),
-                      SizedBox(height: 8),
-                      Text(
-                        'User ID: $userId',
-                        style: TextStyle(fontSize: 16),
-                      ),
-                      SizedBox(height: 8),
-                      Text(
-                        'ID Tiket: $ticketId',
-                        style: TextStyle(fontSize: 16),
-                      ),
-                    ],
+                    ),
                   ),
                 ),
-              );
-            },
+                ListView.builder(
+                  physics: const NeverScrollableScrollPhysics(),
+                  shrinkWrap: true,
+                  itemCount: snapshot.data!.docs.length,
+                  itemBuilder: (context, index) {
+                    var data = snapshot.data!.docs[index].data()
+                        as Map<String, dynamic>;
+                    var bookingDate = (data['timestamp'] as Timestamp).toDate();
+                    var totalPrice = data['totalPrice'];
+                    var paymentMethod = data['paymentMethod'];
+                    var userId = data['userid'];
+                    var ticketId = data['ticketId'];
+
+                    String formattedDate =
+                        DateFormat('MMMM dd, yyyy').format(bookingDate);
+
+                    return Card(
+                      margin: const EdgeInsets.symmetric(
+                          vertical: 8, horizontal: 16),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                      elevation: 4,
+                      child: Padding(
+                        padding: const EdgeInsets.all(16.0),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Tanggal Pemesanan: $formattedDate',
+                              style: const TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w500,
+                                fontFamily: 'Roboto',
+                                color: Colors.black87,
+                              ),
+                            ),
+                            const SizedBox(height: 8),
+                            Text(
+                              'Total Harga: Rp $totalPrice',
+                              style: const TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w500,
+                                fontFamily: 'Roboto',
+                                color: Colors.black87,
+                              ),
+                            ),
+                            const SizedBox(height: 8),
+                            Text(
+                              'Metode Pembayaran: $paymentMethod',
+                              style: const TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w500,
+                                fontFamily: 'Roboto',
+                                color: Colors.black87,
+                              ),
+                            ),
+                            const SizedBox(height: 8),
+                            Text(
+                              'User ID: $userId',
+                              style: const TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w500,
+                                fontFamily: 'Roboto',
+                                color: Colors.black87,
+                              ),
+                            ),
+                            const SizedBox(height: 8),
+                            Text(
+                              'ID Tiket: $ticketId',
+                              style: const TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w500,
+                                fontFamily: 'Roboto',
+                                color: Colors.black87,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    );
+                  },
+                ),
+              ],
+            ),
           );
         },
       ),
@@ -124,7 +198,6 @@ class _PendapatanScreenState extends State<PendapatanScreen> {
             _currentIndex = index;
           });
 
-          // Update the screen based on the selected index
           Navigator.pushReplacement(
             context,
             MaterialPageRoute(
@@ -150,8 +223,8 @@ class _PendapatanScreenState extends State<PendapatanScreen> {
             label: 'Pendapatan',
           ),
         ],
-        selectedItemColor: Colors.black,
-        unselectedItemColor: Colors.black,
+        selectedItemColor: Colors.blueAccent,
+        unselectedItemColor: Colors.black54,
       ),
     );
   }

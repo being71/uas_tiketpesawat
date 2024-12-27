@@ -25,7 +25,7 @@ class _TicketListPageState extends State<TicketListPage> {
         centerTitle: true,
         actions: [
           IconButton(
-            icon: const Icon(Icons.add),
+            icon: const Icon(Icons.add, color: Colors.white),
             onPressed: () {
               // Navigasi ke halaman tambah tiket
               Navigator.push(
@@ -39,8 +39,7 @@ class _TicketListPageState extends State<TicketListPage> {
       body: StreamBuilder<QuerySnapshot>(
         stream: FirebaseFirestore.instance
             .collection('tickets')
-            .orderBy('createdAt',
-                descending: true) // Urutkan berdasarkan waktu pembuatan
+            .orderBy('createdAt', descending: true)
             .snapshots(),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
@@ -48,7 +47,12 @@ class _TicketListPageState extends State<TicketListPage> {
           }
 
           if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-            return const Center(child: Text('Tidak ada tiket yang tersedia.'));
+            return const Center(
+              child: Text(
+                'Tidak ada tiket yang tersedia.',
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              ),
+            );
           }
 
           final tickets = snapshot.data!.docs;
@@ -69,10 +73,8 @@ class _TicketListPageState extends State<TicketListPage> {
             _currentIndex = index;
           });
 
-          // Navigation logic based on selected index
           switch (index) {
             case 0:
-              // Navigate to Home screen
               Navigator.push(
                 context,
                 MaterialPageRoute(
@@ -83,14 +85,12 @@ class _TicketListPageState extends State<TicketListPage> {
               // Stay on TicketListPage
               break;
             case 2:
-              // Navigate to User List Page
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (context) => UserListPage()),
+                MaterialPageRoute(builder: (context) => const UserListPage()),
               );
               break;
             case 3:
-              // Navigate to Pendapatan Screen (not yet implemented)
               Navigator.push(
                 context,
                 MaterialPageRoute(builder: (context) => PendapatanScreen()),
@@ -123,118 +123,100 @@ class _TicketListPageState extends State<TicketListPage> {
   }
 
   Widget _buildTicketCard(BuildContext context, QueryDocumentSnapshot ticket) {
-    // Get the date field
-    dynamic dateField = ticket['date'];
-    String formattedDate = '';
+    final data = ticket.data() as Map<String, dynamic>;
+    String formattedDate = _formatDate(data['date']);
+    bool isFull = data['status'] == 'full';
 
-    // Check if the date is a Timestamp
-    if (dateField is Timestamp) {
-      // If it's a Timestamp, format it as a Date
-      formattedDate = DateFormat('MMMM dd, yyyy').format(dateField.toDate());
-    } else if (dateField is String) {
-      // If it's a String, use it directly or format it if needed
-      formattedDate =
-          dateField; // Assuming the date is in the required format already
-    }
-
-    // Check ticket status
-    bool isFull = ticket['status'] == 'full';
-
-    return Card(
+    return Container(
       margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.3),
+            blurRadius: 8,
+            offset: const Offset(0, 4),
+          ),
+        ],
       ),
-      elevation: 3,
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Informasi utama tiket
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Flexible(
-                  child: Text(
-                    "${ticket['origin']} → ${ticket['destination']}",
-                    style: const TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                    ),
-                    overflow: TextOverflow.ellipsis,
-                    maxLines: 1,
+      padding: const EdgeInsets.all(16.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Flexible(
+                child: Text(
+                  "${data['origin']} → ${data['destination']}",
+                  style: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.blueAccent,
                   ),
+                  overflow: TextOverflow.ellipsis,
+                  maxLines: 1,
                 ),
-                isFull
-                    ? const Text(
-                        "Sold Out",
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.red,
-                        ),
-                      )
-                    : Text(
-                        "Rp ${ticket['price']}",
-                        style: const TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.green,
-                        ),
+              ),
+              isFull
+                  ? const Text(
+                      "Sold Out",
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.red,
                       ),
-              ],
+                    )
+                  : Text(
+                      "Rp ${data['price']}",
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.green,
+                      ),
+                    ),
+            ],
+          ),
+          const Divider(color: Colors.grey),
+          Text(
+            "Tanggal: $formattedDate",
+            style: const TextStyle(fontSize: 14),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            "Durasi: ${data['flightDuration']} jam",
+            style: const TextStyle(fontSize: 14),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            "Keberangkatan: ${data['departureTime']}",
+            style: const TextStyle(fontSize: 14),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            "Mendarat: ${data['arrivalTime']}",
+            style: const TextStyle(fontSize: 14),
+          ),
+          const Divider(color: Colors.grey),
+          Text(
+            "Maskapai: ${data['airline']}",
+            style: const TextStyle(
+              fontWeight: FontWeight.bold,
+              color: Colors.blueAccent,
             ),
-            const SizedBox(height: 8),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  "Tanggal: $formattedDate", // Display the formatted date
-                  style: const TextStyle(fontSize: 14),
+          ),
+          const SizedBox(height: 10),
+          Center(
+            child: ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.blueAccent,
+                foregroundColor: Colors.white, // Warna teks tombol
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
                 ),
-                Text(
-                  "Durasi: ${ticket['flightDuration']} jam",
-                  style: const TextStyle(fontSize: 14),
-                ),
-              ],
-            ),
-            const SizedBox(height: 8),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  "Keberangkatan: ${ticket['departureTime']}",
-                  style: const TextStyle(fontSize: 14),
-                ),
-                Text(
-                  "Mendarat: ${ticket['arrivalTime']}",
-                  style: const TextStyle(fontSize: 14),
-                ),
-              ],
-            ),
-            const Divider(height: 20),
-            // Informasi tambahan tiket
-            Text(
-              "Maskapai: ${ticket['airline']}", // Menampilkan nama maskapai
-              style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
-            ),
-            Text(
-              "Tipe Penerbangan: ${ticket['flightType']}",
-              style: const TextStyle(fontSize: 14),
-            ),
-            Text(
-              "Kelas: ${ticket['flightClass']}",
-              style: const TextStyle(fontSize: 14),
-            ),
-            Text(
-              "Bagasi: ${ticket['baggageInfo']} kg",
-              style: const TextStyle(fontSize: 14),
-            ),
-            const SizedBox(height: 10),
-            ElevatedButton(
+              ),
               onPressed: () {
-                // Navigasi ke halaman detail tiket
                 Navigator.push(
                   context,
                   MaterialPageRoute(
@@ -242,11 +224,24 @@ class _TicketListPageState extends State<TicketListPage> {
                   ),
                 );
               },
-              child: const Text('Lihat Detail'),
+              child: const Text(
+                'Lihat Detail',
+                style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+              ),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
+  }
+
+  String _formatDate(dynamic date) {
+    if (date is Timestamp) {
+      return DateFormat('MMMM dd, yyyy').format(date.toDate());
+    } else if (date is String) {
+      return date;
+    } else {
+      return 'Invalid date';
+    }
   }
 }
