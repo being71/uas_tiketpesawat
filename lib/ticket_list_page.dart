@@ -25,7 +25,7 @@ class _TicketListPageState extends State<TicketListPage> {
         centerTitle: true,
         actions: [
           IconButton(
-            icon: const Icon(Icons.add, color: Colors.white),
+            icon: const Icon(Icons.add, color: Colors.blue),
             onPressed: () {
               // Navigasi ke halaman tambah tiket
               Navigator.push(
