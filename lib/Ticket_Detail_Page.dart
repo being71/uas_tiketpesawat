@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:intl/intl.dart'; // Import the intl package
+import 'package:intl/intl.dart';
 import 'package:uas_tiketpesawat/Edit_Ticket_Page.dart';
 
 class TicketDetailPage extends StatelessWidget {
@@ -17,10 +17,40 @@ class TicketDetailPage extends StatelessWidget {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Tiket berhasil dihapus')),
       );
-      Navigator.pop(context); // Kembali ke halaman sebelumnya
+      Navigator.pop(context);
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Gagal menghapus tiket: $e')),
+      );
+    }
+  }
+
+  Future<void> _deletePassenger(
+      BuildContext context, String ticketId, int passengerIndex) async {
+    try {
+      // Mengambil dokumen booked_tickets berdasarkan ticketId dan menghapus penumpang di index yang sesuai
+      final bookedTicketsRef =
+          FirebaseFirestore.instance.collection('booked_tickets');
+      final snapshot =
+          await bookedTicketsRef.where('ticketId', isEqualTo: ticketId).get();
+
+      if (snapshot.docs.isNotEmpty) {
+        final doc = snapshot.docs.first;
+        final List<dynamic> passengers = doc['passengers'];
+
+        // Menghapus penumpang di index yang sesuai
+        passengers.removeAt(passengerIndex);
+
+        // Memperbarui data penumpang yang sudah dihapus
+        await doc.reference.update({'passengers': passengers});
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Penumpang berhasil dihapus')),
+        );
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Gagal menghapus penumpang: $e')),
       );
     }
   }
@@ -47,145 +77,201 @@ class TicketDetailPage extends StatelessWidget {
           }
 
           final ticket = snapshot.data!;
-
-          // Format the date fields
           dynamic dateField = ticket['date'];
-          String formattedDate = '';
-          if (dateField is Timestamp) {
-            formattedDate =
-                DateFormat('MMMM dd, yyyy').format(dateField.toDate());
-          } else if (dateField is String) {
-            formattedDate =
-                dateField; // Assuming the date is in a valid string format
-          }
-
-          // Format return date
-          dynamic returnDateField = ticket[
-              'returnDate']; // Assuming returnDate is available in the Firestore document
-          String formattedReturnDate = '';
-          if (returnDateField is Timestamp) {
-            formattedReturnDate =
-                DateFormat('MMMM dd, yyyy').format(returnDateField.toDate());
-          } else if (returnDateField is String) {
-            formattedReturnDate =
-                returnDateField; // Assuming returnDate is in a valid string format
-          }
+          String formattedDate = dateField is Timestamp
+              ? DateFormat('MMMM dd, yyyy').format(dateField.toDate())
+              : dateField.toString();
 
           return Padding(
             padding: const EdgeInsets.all(16.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Informasi utama tiket
-                Text(
-                  "${ticket['origin']} → ${ticket['destination']}",
-                  style: const TextStyle(
-                    fontSize: 22,
-                    fontWeight: FontWeight.bold,
+            child: SingleChildScrollView(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    "${ticket['origin']} (${ticket['originCode']}) → ${ticket['destination']} (${ticket['destinationCode']})",
+                    style: const TextStyle(
+                        fontSize: 22, fontWeight: FontWeight.bold),
                   ),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  "Harga: Rp ${ticket['price']}",
-                  style: const TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.green,
+                  const SizedBox(height: 8),
+                  Text(
+                    "Harga: Rp ${ticket['price']}",
+                    style: const TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.green),
                   ),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  "Maskapai: ${ticket['airline']}", // Menampilkan nama maskapai
-                  style: const TextStyle(
-                      fontSize: 18, fontWeight: FontWeight.bold),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  "Tanggal Pergi: $formattedDate", // Display the formatted departure date
-                  style: const TextStyle(fontSize: 16),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  "Tanggal Pulang: $formattedReturnDate", // Display the formatted return date
-                  style: const TextStyle(fontSize: 16),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  "Durasi: ${ticket['flightDuration']} jam",
-                  style: const TextStyle(fontSize: 16),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  "Keberangkatan: ${ticket['departureTime']}",
-                  style: const TextStyle(fontSize: 16),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  "Mendarat: ${ticket['arrivalTime']}",
-                  style: const TextStyle(fontSize: 16),
-                ),
-                const Divider(height: 20),
-                // Informasi tambahan tiket
-                Text(
-                  "Tipe Penerbangan: ${ticket['flightType']}",
-                  style: const TextStyle(fontSize: 16),
-                ),
-                Text(
-                  "Kelas: ${ticket['flightClass']}",
-                  style: const TextStyle(fontSize: 16),
-                ),
-                Text(
-                  "Bagasi: ${ticket['baggageInfo']} kg",
-                  style: const TextStyle(fontSize: 16),
-                ),
-                const SizedBox(height: 20),
-                // Row for side-by-side Edit and Delete buttons
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: [
-                    ElevatedButton(
-                      onPressed: () {
-                        // Aksi untuk mengedit tiket
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) =>
-                                EditTicketPage(ticketId: ticketId),
-                          ),
-                        );
-                      },
-                      child: const Text('Edit Tiket'),
-                    ),
-                    ElevatedButton(
-                      onPressed: () async {
-                        final confirm = await showDialog<bool>(
-                          context: context,
-                          builder: (context) => AlertDialog(
-                            title: const Text('Konfirmasi'),
-                            content: const Text(
-                                'Apakah Anda yakin ingin menghapus tiket ini?'),
-                            actions: [
-                              TextButton(
-                                onPressed: () => Navigator.pop(context, false),
-                                child: const Text('Batal'),
-                              ),
-                              TextButton(
-                                onPressed: () => Navigator.pop(context, true),
-                                child: const Text('Hapus'),
-                              ),
-                            ],
-                          ),
-                        );
+                  const SizedBox(height: 8),
+                  Text("Maskapai: ${ticket['airline']}"),
+                  Text("Kelas Penerbangan: ${ticket['flightClass']}"),
+                  Text("Tipe Penerbangan: ${ticket['flightType']}"),
+                  Text("Durasi Penerbangan: ${ticket['flightDuration']} jam"),
+                  Text("Bagasi: ${ticket['baggageInfo']} kg"),
+                  Text("Keberangkatan: ${ticket['departureTime']}"),
+                  Text("Kedatangan: ${ticket['arrivalTime']}"),
+                  Text("Tanggal: $formattedDate"),
+                  Text("Status: ${ticket['status']}"),
+                  const Divider(height: 20),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      ElevatedButton(
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) =>
+                                  EditTicketPage(ticketId: ticketId),
+                            ),
+                          );
+                        },
+                        child: const Text('Edit Tiket'),
+                      ),
+                      ElevatedButton(
+                        onPressed: () async {
+                          final confirm = await showDialog<bool>(
+                            context: context,
+                            builder: (context) => AlertDialog(
+                              title: const Text('Konfirmasi'),
+                              content: const Text(
+                                  'Apakah Anda yakin ingin menghapus tiket ini?'),
+                              actions: [
+                                TextButton(
+                                    onPressed: () =>
+                                        Navigator.pop(context, false),
+                                    child: const Text('Batal')),
+                                TextButton(
+                                    onPressed: () =>
+                                        Navigator.pop(context, true),
+                                    child: const Text('Hapus')),
+                              ],
+                            ),
+                          );
 
-                        if (confirm == true) {
-                          _deleteTicket(context);
-                        }
-                      },
-                      child: const Text('Hapus Tiket'),
-                    ),
-                  ],
-                ),
-              ],
+                          if (confirm == true) {
+                            _deleteTicket(context);
+                          }
+                        },
+                        child: const Text('Hapus Tiket'),
+                      ),
+                    ],
+                  ),
+                  const Divider(height: 20),
+                  const Text(
+                    "Daftar Penumpang:",
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(height: 8),
+                  StreamBuilder<QuerySnapshot>(
+                    stream: FirebaseFirestore.instance
+                        .collection('booked_tickets')
+                        .where('ticketId', isEqualTo: ticketId)
+                        .snapshots(),
+                    builder: (context, passengerSnapshot) {
+                      if (passengerSnapshot.connectionState ==
+                          ConnectionState.waiting) {
+                        return const Center(child: CircularProgressIndicator());
+                      }
+
+                      if (!passengerSnapshot.hasData ||
+                          passengerSnapshot.data!.docs.isEmpty) {
+                        return const Text(
+                            "Belum ada penumpang yang terdaftar.");
+                      }
+
+                      final passengers = passengerSnapshot
+                          .data!.docs.first['passengers'] as List<dynamic>;
+                      // Mengakses data di luar passengers
+                      final paymentMethod =
+                          passengerSnapshot.data!.docs.first['paymentMethod'] ??
+                              'Tidak tersedia';
+                      final status =
+                          passengerSnapshot.data!.docs.first['status'] ??
+                              'Tidak tersedia';
+
+                      return ListView.builder(
+                        shrinkWrap: true,
+                        physics: const NeverScrollableScrollPhysics(),
+                        itemCount: passengers.length,
+                        itemBuilder: (context, index) {
+                          final passenger = passengers[index];
+
+                          // Mengakses data dalam passengers
+                          final firstName =
+                              passenger['firstName'] ?? 'Tidak tersedia';
+                          final lastName =
+                              passenger['lastName'] ?? 'Tidak tersedia';
+                          final birthDate =
+                              passenger['birthDate'] ?? 'Tidak tersedia';
+                          final nationality =
+                              passenger['nationality'] ?? 'Tidak tersedia';
+
+                          return Card(
+                            margin: const EdgeInsets.symmetric(
+                                vertical: 8, horizontal: 0),
+                            child: Padding(
+                              padding: const EdgeInsets.all(16.0),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    "$firstName $lastName",
+                                    style: const TextStyle(
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.bold),
+                                  ),
+                                  const SizedBox(height: 2),
+                                  Text("Tanggal Lahir: $birthDate"),
+                                  Text("Kewarganegaraan: $nationality"),
+                                  const SizedBox(height: 8),
+                                  // Menampilkan data yang berada di luar passengers
+                                  Text("Metode Pembayaran: $paymentMethod"),
+                                  Text("Status: $status"),
+                                  const SizedBox(height: 8),
+                                  // Tombol Hapus Penumpang
+                                  ElevatedButton(
+                                    onPressed: () async {
+                                      final confirm = await showDialog<bool>(
+                                        context: context,
+                                        builder: (context) => AlertDialog(
+                                          title: const Text(
+                                              'Konfirmasi Hapus Penumpang'),
+                                          content: const Text(
+                                              'Apakah Anda yakin ingin menghapus penumpang ini?'),
+                                          actions: [
+                                            TextButton(
+                                                onPressed: () => Navigator.pop(
+                                                    context, false),
+                                                child: const Text('Batal')),
+                                            TextButton(
+                                                onPressed: () => Navigator.pop(
+                                                    context, true),
+                                                child: const Text('Hapus')),
+                                          ],
+                                        ),
+                                      );
+
+                                      if (confirm == true) {
+                                        _deletePassenger(
+                                            context, ticketId, index);
+                                      }
+                                    },
+                                    child: const Text('Hapus Penumpang'),
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: Colors
+                                          .white, // Warna merah untuk tombol hapus
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          );
+                        },
+                      );
+                    },
+                  )
+                ],
+              ),
             ),
           );
         },
