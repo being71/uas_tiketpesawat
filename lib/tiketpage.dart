@@ -48,7 +48,8 @@ class _TicketPageState extends State<TicketPage> {
     final DateTimeRange? picked = await showDateRangePicker(
       context: context,
       firstDate: DateTime.now(),
-      lastDate: DateTime(DateTime.now().year + 1),
+      lastDate:
+          DateTime.now().add(Duration(days: 30)), // Ubah ini ke satu bulan
     );
 
     if (picked != null) {
@@ -643,6 +644,153 @@ class FlightCardOneWay extends StatelessWidget {
   }
 }
 
+class FlightCardOrderedOneWay extends StatelessWidget {
+  final String airline;
+  final String date;
+  final String flightType;
+  final String departureTime;
+  final String arrivalTime;
+  final int flightDuration;
+  final String price;
+  final String flightClass;
+  final String origin;
+  final String destination;
+  final Map<String, dynamic> ticket;
+
+  const FlightCardOrderedOneWay({
+    Key? key,
+    required this.airline,
+    required this.date,
+    required this.flightType,
+    required this.departureTime,
+    required this.arrivalTime,
+    required this.flightDuration,
+    required this.price,
+    required this.flightClass,
+    required this.origin,
+    required this.destination,
+    required this.ticket,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
+      padding: const EdgeInsets.all(16.0),
+      decoration: BoxDecoration(
+        color: Colors.grey.shade100,
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.2),
+            blurRadius: 5,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          // Flight details section
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Container(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
+                decoration: BoxDecoration(
+                  color: Colors.grey.shade300,
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Text(
+                  flightClass,
+                  style: const TextStyle(fontSize: 12, color: Colors.black54),
+                ),
+              ),
+              const SizedBox(height: 8.0),
+              Text(
+                airline,
+                style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ],
+          ),
+
+          // Time & Location section
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Row(
+                children: [
+                  Text(
+                    departureTime,
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  Text(' $origin'),
+                ],
+              ),
+              const SizedBox(height: 4.0),
+              Text(
+                '• $flightDuration jam',
+                style: const TextStyle(fontSize: 12, color: Colors.black54),
+              ),
+              const SizedBox(height: 4.0),
+              Row(
+                children: [
+                  Text(
+                    arrivalTime,
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  Text(' $destination'),
+                ],
+              ),
+              Row(
+                children: [
+                  Text(
+                    date,
+                    style: const TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+
+          // Price section
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              ElevatedButton(
+                onPressed: () {},
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.white,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(50),
+                  ),
+                ),
+                child: const Text(
+                  'Booked',
+                  style: TextStyle(fontSize: 12),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
 class FlightCardTwoWay extends StatelessWidget {
   final String airline;
   final String flightType;
@@ -863,6 +1011,245 @@ class FlightCardTwoWay extends StatelessWidget {
                   'Checkout',
                   style: TextStyle(
                       fontSize: 12, color: Colors.white), // Teks putih
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class FlightCardOrderedTwoWay extends StatelessWidget {
+  final String airline;
+  final String date;
+  final String flightType;
+  final String departureTime;
+  final String arrivalTime;
+  final int flightDuration;
+  final String price;
+  final String flightClass;
+  final String origin;
+  final String destination;
+  final Map<String, dynamic> ticket;
+
+  const FlightCardOrderedTwoWay({
+    Key? key,
+    required this.airline,
+    required this.date,
+    required this.flightType,
+    required this.departureTime,
+    required this.arrivalTime,
+    required this.flightDuration,
+    required this.price,
+    required this.flightClass,
+    required this.origin,
+    required this.destination,
+    required this.ticket,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
+      padding: const EdgeInsets.all(16.0),
+      decoration: BoxDecoration(
+        color: Colors.grey.shade100,
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.2),
+            blurRadius: 5,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        children: [
+          // Flight details section
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Container(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: Colors.grey.shade300,
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Text(
+                      flightClass,
+                      style:
+                          const TextStyle(fontSize: 12, color: Colors.black54),
+                    ),
+                  ),
+                ],
+              ),
+              SizedBox(height: 10),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                mainAxisAlignment: MainAxisAlignment
+                    .end, // This will ensure content is spread out vertically
+                children: [
+                  Row(
+                    children: [
+                      Column(
+                        children: [
+                          Text(
+                            '$airline',
+                            style: const TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ],
+                      ),
+                      SizedBox(width: 30),
+                      Column(
+                        children: [
+                          Row(
+                            children: [
+                              Text(
+                                departureTime,
+                                style: const TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              Text(' $origin'),
+                              const SizedBox(height: 4.0),
+                            ],
+                          ),
+                          Text(
+                            '• $flightDuration jam',
+                            style: const TextStyle(
+                                fontSize: 12, color: Colors.black54),
+                          ),
+                          const SizedBox(height: 4.0),
+                          Row(
+                            children: [
+                              Text(
+                                arrivalTime,
+                                style: const TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              Text(' $destination'),
+                            ],
+                          ),
+                          Row(
+                            children: [
+                              Text(
+                                date,
+                                style: const TextStyle(
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                  SizedBox(height: 20),
+                  Row(
+                    children: [
+                      Column(
+                        children: [
+                          Text(
+                            '$airline',
+                            style: const TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ],
+                      ),
+                      SizedBox(width: 30),
+                      Column(
+                        children: [
+                          Row(
+                            children: [
+                              Text(
+                                departureTime,
+                                style: const TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              Text(' $origin'),
+                              const SizedBox(height: 4.0),
+                            ],
+                          ),
+                          Text(
+                            '• $flightDuration jam',
+                            style: const TextStyle(
+                                fontSize: 12, color: Colors.black54),
+                          ),
+                          const SizedBox(height: 4.0),
+                          Row(
+                            children: [
+                              Text(
+                                arrivalTime,
+                                style: const TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              Text(' $destination'),
+                            ],
+                          ),
+                          Row(
+                            children: [
+                              Text(
+                                date,
+                                style: const TextStyle(
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ],
+          ),
+          SizedBox(height: 10),
+          // Time & Location section
+
+          // Price section
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              ElevatedButton(
+                onPressed: () {
+                  // Navigate to CheckoutPage
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => CheckoutPage(ticket: ticket),
+                    ),
+                  );
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.white,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(50),
+                  ),
+                ),
+                child: const Text(
+                  'Booked',
+                  style: TextStyle(fontSize: 12),
                 ),
               ),
             ],

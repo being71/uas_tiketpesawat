@@ -71,6 +71,7 @@ class FirestoreService {
       List<Map<String, dynamic>> tickets = snapshot.docs.map((doc) {
         return {
           'docId': doc.id,
+          'date': doc['date'] ?? 'Unknown Date',
           'airline': doc['airline'] ?? 'Unknown Airline',
           'arrivalTime': doc['arrivalTime'] ?? 'Unknown Arrival',
           'baggageInfo': doc['baggageInfo'] ?? 0,
@@ -156,6 +157,36 @@ class FirestoreService {
       return tickets;
     } catch (e) {
       throw Exception("Gagal melakukan pencarian tiket:$e");
+    }
+  }
+
+  // Method untuk mengambil booked_tickets berdasarkan userId
+  Future<List<Map<String, dynamic>>> getBookedTickets(String userId) async {
+    try {
+      var snapshot = await firestore
+          .collection('booked_tickets')
+          .where('userId', isEqualTo: userId)
+          .get();
+
+      List<Map<String, dynamic>> tickets = [];
+      for (var doc in snapshot.docs) {
+        tickets.add(doc.data());
+      }
+      return tickets;
+    } catch (e) {
+      print('Error fetching booked tickets: $e');
+      return [];
+    }
+  }
+
+  // Method untuk mengambil ticket berdasarkan ticketId
+  Future<Map<String, dynamic>> getTicketData(String ticketId) async {
+    try {
+      var doc = await firestore.collection('tickets').doc(ticketId).get();
+      return doc.data() ?? {};
+    } catch (e) {
+      print('Error fetching ticket data: $e');
+      return {};
     }
   }
 }
