@@ -29,7 +29,7 @@ class _PendapatanScreenState extends State<PendapatanScreen> {
         title: Text('Pendapatan'),
       ),
       body: FutureBuilder<QuerySnapshot>(
-        future: FirebaseFirestore.instance.collection('bookings').get(),
+        future: FirebaseFirestore.instance.collection('booked_tickets').get(),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return Center(child: CircularProgressIndicator());
@@ -67,10 +67,10 @@ class _PendapatanScreenState extends State<PendapatanScreen> {
 
               var data =
                   snapshot.data!.docs[index - 1].data() as Map<String, dynamic>;
-              var bookingDate = (data['bookingDate'] as Timestamp).toDate();
+              var bookingDate = (data['timestamp'] as Timestamp).toDate();
               var totalPrice = data['totalPrice'];
               var paymentMethod = data['paymentMethod'];
-              var userId = data['userId'];
+              var userId = data['userid'];
               var ticketId = data['ticketId'];
 
               // Format tanggal

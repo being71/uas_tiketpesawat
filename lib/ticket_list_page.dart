@@ -137,6 +137,9 @@ class _TicketListPageState extends State<TicketListPage> {
           dateField; // Assuming the date is in the required format already
     }
 
+    // Check ticket status
+    bool isFull = ticket['status'] == 'full';
+
     return Card(
       margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
       shape: RoundedRectangleBorder(
@@ -163,14 +166,23 @@ class _TicketListPageState extends State<TicketListPage> {
                     maxLines: 1,
                   ),
                 ),
-                Text(
-                  "Rp ${ticket['price']}",
-                  style: const TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.green,
-                  ),
-                ),
+                isFull
+                    ? const Text(
+                        "Sold Out",
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.red,
+                        ),
+                      )
+                    : Text(
+                        "Rp ${ticket['price']}",
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.green,
+                        ),
+                      ),
               ],
             ),
             const SizedBox(height: 8),
