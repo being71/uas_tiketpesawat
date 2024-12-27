@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:intl/intl.dart';
-import 'package:uas_tiketpesawat/user_list.dart';
-import 'home_screen_admin.dart'; // Import your screens
+import 'home_screen_admin.dart';
 import 'ticket_list_page.dart';
 import 'user_list.dart';
 
@@ -70,8 +69,9 @@ class _PendapatanScreenState extends State<PendapatanScreen> {
               var bookingDate = (data['timestamp'] as Timestamp).toDate();
               var totalPrice = data['totalPrice'];
               var paymentMethod = data['paymentMethod'];
-              var userId = data['userid'];
+              var userId = data['userId'];
               var ticketId = data['ticketId'];
+              var passengers = data['passengers'] as List<dynamic>? ?? [];
 
               // Format tanggal
               String formattedDate =
@@ -109,6 +109,28 @@ class _PendapatanScreenState extends State<PendapatanScreen> {
                         'ID Tiket: $ticketId',
                         style: TextStyle(fontSize: 16),
                       ),
+                      SizedBox(height: 16),
+                      Text(
+                        'Penumpang:',
+                        style: TextStyle(
+                            fontSize: 16, fontWeight: FontWeight.bold),
+                      ),
+                      ...passengers.map((passenger) {
+                        var passengerData =
+                            passenger as Map<String, dynamic>? ?? {};
+                        return Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 8.0),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'Nama: ${passengerData['firstName']} ${passengerData['lastName']}',
+                                style: TextStyle(fontSize: 14),
+                              ),
+                            ],
+                          ),
+                        );
+                      }).toList(),
                     ],
                   ),
                 ),
