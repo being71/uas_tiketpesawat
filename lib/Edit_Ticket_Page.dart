@@ -23,7 +23,7 @@ class _EditTicketPageState extends State<EditTicketPage> {
   late TextEditingController _flightTypeController;
   late TextEditingController _flightClassController;
   late TextEditingController _baggageInfoController;
-  late TextEditingController _airlineController; // Controller untuk Airline
+  late TextEditingController _airlineController;
 
   @override
   void initState() {
@@ -43,8 +43,7 @@ class _EditTicketPageState extends State<EditTicketPage> {
     _flightTypeController = TextEditingController();
     _flightClassController = TextEditingController();
     _baggageInfoController = TextEditingController();
-    _airlineController =
-        TextEditingController(); // Inisialisasi controller airline
+    _airlineController = TextEditingController();
   }
 
   Future<void> _fetchTicketData() async {
@@ -59,24 +58,20 @@ class _EditTicketPageState extends State<EditTicketPage> {
       _originController.text = ticket['origin'];
       _destinationController.text = ticket['destination'];
       _priceController.text = ticket['price'].toString();
-
-      // Periksa jika 'date' adalah Timestamp
       if (ticket['date'] is Timestamp) {
         Timestamp timestamp = ticket['date'];
-        _dateController.text = DateFormat('yyyy-MM-dd')
-            .format(timestamp.toDate()); // Format tanggal
-      } else if (ticket['date'] is String) {
         _dateController.text =
-            ticket['date']; // Jika sudah String, langsung pakai
+            DateFormat('yyyy-MM-dd').format(timestamp.toDate());
+      } else if (ticket['date'] is String) {
+        _dateController.text = ticket['date'];
       }
-
       _flightDurationController.text = ticket['flightDuration'].toString();
       _departureTimeController.text = ticket['departureTime'];
       _arrivalTimeController.text = ticket['arrivalTime'];
       _flightTypeController.text = ticket['flightType'];
       _flightClassController.text = ticket['flightClass'];
       _baggageInfoController.text = ticket['baggageInfo'].toString();
-      _airlineController.text = ticket['airline']; // Ambil data airline
+      _airlineController.text = ticket['airline'];
     }
   }
 
@@ -101,11 +96,12 @@ class _EditTicketPageState extends State<EditTicketPage> {
         'flightType': _flightTypeController.text,
         'flightClass': _flightClassController.text,
         'baggageInfo': double.tryParse(_baggageInfoController.text) ?? 0.0,
-        'airline': _airlineController.text, // Update airline
+        'airline': _airlineController.text,
       });
 
       ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Tiket berhasil diperbarui!')));
+        const SnackBar(content: Text('Tiket berhasil diperbarui!')),
+      );
       Navigator.pop(context);
     }
   }
@@ -122,7 +118,7 @@ class _EditTicketPageState extends State<EditTicketPage> {
     _flightTypeController.dispose();
     _flightClassController.dispose();
     _baggageInfoController.dispose();
-    _airlineController.dispose(); // Dispose controller airline
+    _airlineController.dispose();
     super.dispose();
   }
 
@@ -130,119 +126,86 @@ class _EditTicketPageState extends State<EditTicketPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Edit Tiket'),
+        title: const Text('Edit Tiket'),
         centerTitle: true,
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Form(
           key: _formKey,
-          child: ListView(
+          child: Column(
             children: [
-              // Origin
-              TextFormField(
-                controller: _originController,
-                decoration: const InputDecoration(labelText: 'Asal'),
-                validator: (value) =>
-                    value!.isEmpty ? 'Harap masukkan asal penerbangan' : null,
+              Expanded(
+                child: ListView(
+                  children: [
+                    _buildTextField(_originController, 'Asal',
+                        'Harap masukkan asal penerbangan'),
+                    _buildTextField(_destinationController, 'Tujuan',
+                        'Harap masukkan tujuan penerbangan'),
+                    _buildTextField(
+                        _priceController, 'Harga', 'Harap masukkan harga tiket',
+                        keyboardType: TextInputType.number),
+                    _buildTextField(_dateController, 'Tanggal',
+                        'Harap masukkan tanggal penerbangan'),
+                    _buildTextField(_flightDurationController, 'Durasi (jam)',
+                        'Harap masukkan durasi penerbangan',
+                        keyboardType: TextInputType.number),
+                    _buildTextField(
+                        _departureTimeController,
+                        'Waktu Keberangkatan',
+                        'Harap masukkan waktu keberangkatan'),
+                    _buildTextField(_arrivalTimeController, 'Waktu Mendarat',
+                        'Harap masukkan waktu mendarat'),
+                    _buildTextField(_flightTypeController, 'Tipe Penerbangan',
+                        'Harap masukkan tipe penerbangan'),
+                    _buildTextField(_flightClassController, 'Kelas Penerbangan',
+                        'Harap masukkan kelas penerbangan'),
+                    _buildTextField(_baggageInfoController, 'Bagasi (kg)',
+                        'Harap masukkan informasi bagasi',
+                        keyboardType: TextInputType.number),
+                    _buildTextField(_airlineController, 'Airline',
+                        'Harap masukkan nama maskapai'),
+                  ],
+                ),
               ),
-              const SizedBox(height: 8),
-              // Destination
-              TextFormField(
-                controller: _destinationController,
-                decoration: const InputDecoration(labelText: 'Tujuan'),
-                validator: (value) =>
-                    value!.isEmpty ? 'Harap masukkan tujuan penerbangan' : null,
-              ),
-              const SizedBox(height: 8),
-              // Price
-              TextFormField(
-                controller: _priceController,
-                decoration: const InputDecoration(labelText: 'Harga'),
-                keyboardType: TextInputType.number,
-                validator: (value) =>
-                    value!.isEmpty ? 'Harap masukkan harga tiket' : null,
-              ),
-              const SizedBox(height: 8),
-              // Date
-              TextFormField(
-                controller: _dateController,
-                decoration: const InputDecoration(labelText: 'Tanggal'),
-                validator: (value) => value!.isEmpty
-                    ? 'Harap masukkan tanggal penerbangan'
-                    : null,
-              ),
-              const SizedBox(height: 8),
-              // Flight Duration
-              TextFormField(
-                controller: _flightDurationController,
-                decoration: const InputDecoration(labelText: 'Durasi (jam)'),
-                keyboardType: TextInputType.number,
-                validator: (value) =>
-                    value!.isEmpty ? 'Harap masukkan durasi penerbangan' : null,
-              ),
-              const SizedBox(height: 8),
-              // Departure Time
-              TextFormField(
-                controller: _departureTimeController,
-                decoration:
-                    const InputDecoration(labelText: 'Waktu Keberangkatan'),
-                validator: (value) => value!.isEmpty
-                    ? 'Harap masukkan waktu keberangkatan'
-                    : null,
-              ),
-              const SizedBox(height: 8),
-              // Arrival Time
-              TextFormField(
-                controller: _arrivalTimeController,
-                decoration: const InputDecoration(labelText: 'Waktu Mendarat'),
-                validator: (value) =>
-                    value!.isEmpty ? 'Harap masukkan waktu mendarat' : null,
-              ),
-              const SizedBox(height: 8),
-              // Flight Type
-              TextFormField(
-                controller: _flightTypeController,
-                decoration:
-                    const InputDecoration(labelText: 'Tipe Penerbangan'),
-                validator: (value) =>
-                    value!.isEmpty ? 'Harap masukkan tipe penerbangan' : null,
-              ),
-              const SizedBox(height: 8),
-              // Flight Class
-              TextFormField(
-                controller: _flightClassController,
-                decoration:
-                    const InputDecoration(labelText: 'Kelas Penerbangan'),
-                validator: (value) =>
-                    value!.isEmpty ? 'Harap masukkan kelas penerbangan' : null,
-              ),
-              const SizedBox(height: 8),
-              // Baggage Info
-              TextFormField(
-                controller: _baggageInfoController,
-                decoration: const InputDecoration(labelText: 'Bagasi (kg)'),
-                keyboardType: TextInputType.number,
-                validator: (value) =>
-                    value!.isEmpty ? 'Harap masukkan informasi bagasi' : null,
-              ),
-              const SizedBox(height: 8),
-              // Airline
-              TextFormField(
-                controller: _airlineController,
-                decoration: const InputDecoration(labelText: 'Airline'),
-                validator: (value) =>
-                    value!.isEmpty ? 'Harap masukkan nama maskapai' : null,
-              ),
-              const SizedBox(height: 20),
-              // Save Button
               ElevatedButton(
                 onPressed: _updateTicket,
-                child: const Text('Simpan Perubahan'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.blueAccent,
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8)),
+                  minimumSize:
+                      const Size.fromHeight(48), // Tinggi tombol proporsional
+                ),
+                child: const Text(
+                  'Simpan Perubahan',
+                  style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white),
+                ),
               ),
             ],
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _buildTextField(
+      TextEditingController controller, String label, String errorMessage,
+      {TextInputType keyboardType = TextInputType.text}) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8.0),
+      child: TextFormField(
+        controller: controller,
+        decoration: InputDecoration(
+          labelText: label,
+          border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+        ),
+        validator: (value) => value!.isEmpty ? errorMessage : null,
+        keyboardType: keyboardType,
       ),
     );
   }

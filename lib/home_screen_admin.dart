@@ -6,7 +6,6 @@ import 'package:uas_tiketpesawat/login.dart';
 import 'package:uas_tiketpesawat/pedapatan_screen.dart';
 import 'package:uas_tiketpesawat/ticket_list_page.dart';
 import 'package:uas_tiketpesawat/user_list.dart';
-import 'ticket_detail_page.dart';
 
 class HomeScreenAdmin extends StatefulWidget {
   const HomeScreenAdmin({Key? key}) : super(key: key);
@@ -20,70 +19,53 @@ class _HomeScreenAdminState extends State<HomeScreenAdmin> {
   double totalPendapatan = 0;
   int totalTicketsSold = 0;
 
-  // Function to get the number of users from Firestore
   Future<int> _getUserCount() async {
     QuerySnapshot snapshot =
         await FirebaseFirestore.instance.collection('users').get();
     return snapshot.docs.length;
   }
 
-  // Function to calculate total revenue from bookings
   Future<void> _calculateRevenue() async {
-    // Query the bookings collection
     QuerySnapshot snapshot =
         await FirebaseFirestore.instance.collection('booked_tickets').get();
 
     double total = 0;
     int soldTickets = 0;
 
-    // Loop through all the bookings to calculate the total revenue and total tickets sold
     for (var doc in snapshot.docs) {
       var data = doc.data() as Map<String, dynamic>;
-
-      // Sum the totalPrice to get the total revenue
       total += data['totalPrice'] ?? 0;
-
-      // Check the ticketId and count tickets if available
       if (data['ticketId'] != null) {
-        soldTickets += 1; // Count the ticket as sold
+        soldTickets += 1;
       }
     }
 
-    // Update the state to reflect the calculated values
     setState(() {
       totalPendapatan = total;
       totalTicketsSold = soldTickets;
     });
   }
 
-  // Helper function to format the timestamp fields
   String _formatTimestamp(dynamic timestamp) {
     if (timestamp is Timestamp) {
       return DateFormat('MMMM dd, yyyy').format(timestamp.toDate());
     } else if (timestamp is String) {
       try {
-        DateTime dateTime =
-            DateTime.parse(timestamp); // Try parsing String to DateTime
+        DateTime dateTime = DateTime.parse(timestamp);
         return DateFormat('MMMM dd, yyyy').format(dateTime);
       } catch (e) {
-        return "Invalid date"; // Fallback if parsing fails
+        return "Invalid date";
       }
     }
-    return "Invalid date"; // Return a fallback if the type doesn't match
+    return "Invalid date";
   }
 
-  // Function to handle logout
   Future<void> _logout() async {
     try {
-      // Sign out from Firebase Auth
       await FirebaseAuth.instance.signOut();
-
-      // Navigate to LoginPage and replace the current screen
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(
-            builder: (context) =>
-                LoginPage()), // Ensure LoginPage is correctly imported
+        MaterialPageRoute(builder: (context) => const LoginPage()),
       );
     } catch (e) {
       print("Logout failed: $e");
@@ -93,7 +75,7 @@ class _HomeScreenAdminState extends State<HomeScreenAdmin> {
   @override
   void initState() {
     super.initState();
-    _calculateRevenue(); // Call the function to calculate total revenue and tickets sold
+    _calculateRevenue();
   }
 
   @override
@@ -105,22 +87,20 @@ class _HomeScreenAdminState extends State<HomeScreenAdmin> {
         actions: [
           IconButton(
             icon: const Icon(Icons.logout),
-            onPressed: _logout, // Call logout function when pressed
+            onPressed: _logout,
           ),
         ],
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start, // Align to left
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Dummy Card Section
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
-                // Card for "Jumlah User"
                 FutureBuilder<int>(
-                  future: _getUserCount(), // Fetch user count from Firestore
+                  future: _getUserCount(),
                   builder: (context, snapshot) {
                     if (snapshot.connectionState == ConnectionState.waiting) {
                       return const CircularProgressIndicator();
@@ -129,85 +109,36 @@ class _HomeScreenAdminState extends State<HomeScreenAdmin> {
                       return const Text('Error fetching user count');
                     }
                     int userCount = snapshot.data ?? 0;
-                    return Card(
-                      elevation: 5,
-                      child: Padding(
-                        padding: const EdgeInsets.all(16.0),
-                        child: Column(
-                          children: [
-                            const Icon(Icons.person, size: 40),
-                            const SizedBox(height: 8),
-                            const Text(
-                              "Jumlah User",
-                              style: TextStyle(fontWeight: FontWeight.bold),
-                            ),
-                            const SizedBox(height: 4),
-                            Text(
-                              "$userCount", // Display the fetched user count
-                              style: const TextStyle(fontSize: 24),
-                            ),
-                          ],
-                        ),
-                      ),
+                    return _buildStatCard(
+                      title: "Jumlah User",
+                      value: userCount.toString(),
+                      icon: Icons.person,
                     );
                   },
                 ),
-                // Card for "Tiket Terjual"
-                Card(
-                  elevation: 5,
-                  child: Padding(
-                    padding: const EdgeInsets.all(16.0),
-                    child: Column(
-                      children: [
-                        const Icon(Icons.confirmation_number, size: 40),
-                        const SizedBox(height: 8),
-                        const Text("Tiket Terjual",
-                            style: TextStyle(fontWeight: FontWeight.bold)),
-                        const SizedBox(height: 4),
-                        Text(
-                          "$totalTicketsSold", // Display the number of tickets sold
-                          style: const TextStyle(fontSize: 24),
-                        ),
-                      ],
-                    ),
-                  ),
+                _buildStatCard(
+                  title: "Tiket Terjual",
+                  value: totalTicketsSold.toString(),
+                  icon: Icons.confirmation_number,
                 ),
-                // Card for "Pendapatan"
-                Card(
-                  elevation: 5,
-                  child: Padding(
-                    padding: const EdgeInsets.all(16.0),
-                    child: Column(
-                      children: [
-                        const Icon(Icons.attach_money, size: 40),
-                        const SizedBox(height: 8),
-                        const Text("Pendapatan",
-                            style: TextStyle(fontWeight: FontWeight.bold)),
-                        const SizedBox(height: 4),
-                        Text(
-                          "Rp ${totalPendapatan.toStringAsFixed(0)}",
-                          style: const TextStyle(fontSize: 24),
-                        ),
-                      ],
-                    ),
-                  ),
-                )
+                _buildStatCard(
+                  title: "Pendapatan",
+                  value: "Rp ${totalPendapatan.toStringAsFixed(0)}",
+                  icon: Icons.attach_money,
+                ),
               ],
             ),
             const SizedBox(height: 20),
-            // Ticket List Section
             const Text(
               "List Tiket",
               style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 10),
-            // StreamBuilder for fetching ticket data from Firestore
             Expanded(
               child: StreamBuilder<QuerySnapshot>(
                 stream: FirebaseFirestore.instance
                     .collection('tickets')
-                    .orderBy('createdAt',
-                        descending: true) // Sort by creation time
+                    .orderBy('createdAt', descending: true)
                     .snapshots(),
                 builder: (context, snapshot) {
                   if (snapshot.connectionState == ConnectionState.waiting) {
@@ -241,10 +172,8 @@ class _HomeScreenAdminState extends State<HomeScreenAdmin> {
             _currentIndex = index;
           });
 
-          // Navigation logic based on selected index
           switch (index) {
             case 0:
-              // Stay on Home screen
               Navigator.push(
                 context,
                 MaterialPageRoute(
@@ -252,22 +181,18 @@ class _HomeScreenAdminState extends State<HomeScreenAdmin> {
               );
               break;
             case 1:
-              // Navigate to TicketListPage
               Navigator.push(
                 context,
                 MaterialPageRoute(builder: (context) => const TicketListPage()),
               );
               break;
             case 2:
-              // Navigate to User List Page
               Navigator.push(
                 context,
                 MaterialPageRoute(builder: (context) => UserListPage()),
               );
               break;
             case 3:
-              // Navigate to Pendapatan Screen
-              // Navigate to User List Page
               Navigator.push(
                 context,
                 MaterialPageRoute(builder: (context) => PendapatanScreen()),
@@ -299,91 +224,124 @@ class _HomeScreenAdminState extends State<HomeScreenAdmin> {
     );
   }
 
-  Widget _buildTicketCard(BuildContext context, QueryDocumentSnapshot ticket) {
-    return Card(
-      margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-      ),
-      elevation: 3,
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start, // Align to left
-          children: [
-            // Main ticket info
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Flexible(
-                  child: Text(
-                    "${ticket['origin']} → ${ticket['destination']}",
-                    style: const TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                    ),
-                    overflow: TextOverflow.ellipsis, // Truncate long text
-                    maxLines: 1,
+  Widget _buildStatCard({
+    required String title,
+    required String value,
+    required IconData icon,
+  }) {
+    return Flexible(
+      child: Card(
+        elevation: 4,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            children: [
+              Icon(icon, size: 40, color: Colors.blueAccent),
+              const SizedBox(height: 8),
+              Text(
+                title,
+                style: const TextStyle(
+                  fontWeight: FontWeight.bold,
+                  color: Colors.blueAccent,
+                  fontSize: 14,
+                ),
+              ),
+              const SizedBox(height: 4),
+              FittedBox(
+                child: Text(
+                  value,
+                  style: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.black,
                   ),
                 ),
-                Text(
-                  "Rp ${ticket['price']}",
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildTicketCard(BuildContext context, QueryDocumentSnapshot ticket) {
+    final data = ticket.data() as Map<String, dynamic>;
+    return Container(
+      margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.3),
+            blurRadius: 8,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      padding: const EdgeInsets.all(16.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Flexible(
+                child: Text(
+                  "${data['origin']} → ${data['destination']}",
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.blueAccent,
+                  ),
+                  overflow: TextOverflow.ellipsis,
+                  maxLines: 1,
+                ),
+              ),
+              FittedBox(
+                child: Text(
+                  "Rp ${data['price'].toInt()}",
                   style: const TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
                     color: Colors.green,
                   ),
                 ),
-              ],
+              ),
+            ],
+          ),
+          const Divider(color: Colors.grey),
+          Text(
+            "Tanggal: ${_formatTimestamp(data['date'])}",
+            style: const TextStyle(fontSize: 14),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            "Durasi: ${data['flightDuration']} jam",
+            style: const TextStyle(fontSize: 14),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            "Keberangkatan: ${data['departureTime']}",
+            style: const TextStyle(fontSize: 14),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            "Mendarat: ${data['arrivalTime']}",
+            style: const TextStyle(fontSize: 14),
+          ),
+          const Divider(color: Colors.grey),
+          Text(
+            "Maskapai: ${data['airline']}",
+            style: const TextStyle(
+              fontWeight: FontWeight.bold,
+              color: Colors.blueAccent,
             ),
-            const SizedBox(height: 8),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  "Tanggal: ${_formatTimestamp(ticket['date'])}", // Formatted date
-                  style: const TextStyle(fontSize: 14),
-                ),
-                Text(
-                  "Durasi: ${ticket['flightDuration']} jam",
-                  style: const TextStyle(fontSize: 14),
-                ),
-              ],
-            ),
-            const SizedBox(height: 8),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  "Keberangkatan: ${ticket['departureTime']}",
-                  style: const TextStyle(fontSize: 14),
-                ),
-                Text(
-                  "Mendarat: ${ticket['arrivalTime']}",
-                  style: const TextStyle(fontSize: 14),
-                ),
-              ],
-            ),
-            const Divider(height: 20),
-            Text(
-              "Maskapai: ${ticket['airline']}", // Menampilkan nama maskapai
-              style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
-            ),
-            // Additional ticket info
-            Text(
-              "Tipe Penerbangan: ${ticket['flightType']}",
-              style: const TextStyle(fontSize: 14),
-            ),
-            Text(
-              "Kelas: ${ticket['flightClass']}",
-              style: const TextStyle(fontSize: 14),
-            ),
-            Text(
-              "Bagasi: ${ticket['baggageInfo']} kg",
-              style: const TextStyle(fontSize: 14),
-            ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }

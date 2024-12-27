@@ -28,7 +28,6 @@ class TicketDetailPage extends StatelessWidget {
   Future<void> _deletePassenger(
       BuildContext context, String ticketId, int passengerIndex) async {
     try {
-      // Mengambil dokumen booked_tickets berdasarkan ticketId dan menghapus penumpang di index yang sesuai
       final bookedTicketsRef =
           FirebaseFirestore.instance.collection('booked_tickets');
       final snapshot =
@@ -38,10 +37,8 @@ class TicketDetailPage extends StatelessWidget {
         final doc = snapshot.docs.first;
         final List<dynamic> passengers = doc['passengers'];
 
-        // Menghapus penumpang di index yang sesuai
         passengers.removeAt(passengerIndex);
 
-        // Memperbarui data penumpang yang sudah dihapus
         await doc.reference.update({'passengers': passengers});
 
         ScaffoldMessenger.of(context).showSnackBar(
@@ -82,200 +79,233 @@ class TicketDetailPage extends StatelessWidget {
               ? DateFormat('MMMM dd, yyyy').format(dateField.toDate())
               : dateField.toString();
 
-          return Padding(
+          return SingleChildScrollView(
             padding: const EdgeInsets.all(16.0),
-            child: SingleChildScrollView(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    "${ticket['origin']} (${ticket['originCode']}) → ${ticket['destination']} (${ticket['destinationCode']})",
-                    style: const TextStyle(
-                        fontSize: 22, fontWeight: FontWeight.bold),
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    "Harga: Rp ${ticket['price']}",
-                    style: const TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.green),
-                  ),
-                  const SizedBox(height: 8),
-                  Text("Maskapai: ${ticket['airline']}"),
-                  Text("Kelas Penerbangan: ${ticket['flightClass']}"),
-                  Text("Tipe Penerbangan: ${ticket['flightType']}"),
-                  Text("Durasi Penerbangan: ${ticket['flightDuration']} jam"),
-                  Text("Bagasi: ${ticket['baggageInfo']} kg"),
-                  Text("Keberangkatan: ${ticket['departureTime']}"),
-                  Text("Kedatangan: ${ticket['arrivalTime']}"),
-                  Text("Tanggal: $formattedDate"),
-                  Text("Status: ${ticket['status']}"),
-                  const Divider(height: 20),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: [
-                      ElevatedButton(
-                        onPressed: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) =>
-                                  EditTicketPage(ticketId: ticketId),
-                            ),
-                          );
-                        },
-                        child: const Text('Edit Tiket'),
+            child: Card(
+              elevation: 4,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Center(
+                      child: Text(
+                        "${ticket['origin']} (${ticket['originCode']}) → ${ticket['destination']} (${ticket['destinationCode']})",
+                        style: const TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.blueAccent,
+                        ),
                       ),
-                      ElevatedButton(
-                        onPressed: () async {
-                          final confirm = await showDialog<bool>(
-                            context: context,
-                            builder: (context) => AlertDialog(
-                              title: const Text('Konfirmasi'),
-                              content: const Text(
-                                  'Apakah Anda yakin ingin menghapus tiket ini?'),
-                              actions: [
-                                TextButton(
+                    ),
+                    const SizedBox(height: 16),
+                    _buildListTile(
+                      icon: Icons.monetization_on,
+                      title: 'Harga',
+                      value: "Rp ${ticket['price']}",
+                      valueStyle: const TextStyle(
+                          color: Colors.green, fontWeight: FontWeight.bold),
+                    ),
+                    _buildListTile(
+                      icon: Icons.airlines,
+                      title: 'Maskapai',
+                      value: ticket['airline'] ?? 'Tidak Diketahui',
+                    ),
+                    _buildListTile(
+                      icon: Icons.airline_seat_recline_normal,
+                      title: 'Kelas Penerbangan',
+                      value: ticket['flightClass'] ?? 'Tidak Diketahui',
+                    ),
+                    _buildListTile(
+                      icon: Icons.flight_takeoff,
+                      title: 'Tipe Penerbangan',
+                      value: ticket['flightType'] ?? 'Tidak Diketahui',
+                    ),
+                    _buildListTile(
+                      icon: Icons.timer,
+                      title: 'Durasi Penerbangan',
+                      value: '${ticket['flightDuration']} jam',
+                    ),
+                    _buildListTile(
+                      icon: Icons.luggage,
+                      title: 'Bagasi',
+                      value: '${ticket['baggageInfo']} kg',
+                    ),
+                    _buildListTile(
+                      icon: Icons.access_time,
+                      title: 'Keberangkatan',
+                      value: ticket['departureTime'] ?? 'Tidak Diketahui',
+                    ),
+                    _buildListTile(
+                      icon: Icons.access_time_filled,
+                      title: 'Kedatangan',
+                      value: ticket['arrivalTime'] ?? 'Tidak Diketahui',
+                    ),
+                    _buildListTile(
+                      icon: Icons.calendar_today,
+                      title: 'Tanggal',
+                      value: formattedDate,
+                    ),
+                    _buildListTile(
+                      icon: Icons.info,
+                      title: 'Status',
+                      value: ticket['status'] ?? 'Tidak Diketahui',
+                    ),
+                    const Divider(height: 20),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: [
+                        ElevatedButton(
+                          onPressed: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) =>
+                                    EditTicketPage(ticketId: ticketId),
+                              ),
+                            );
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.blueAccent,
+                            foregroundColor: Colors.white,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                          ),
+                          child: const Text('Edit Tiket'),
+                        ),
+                        ElevatedButton(
+                          onPressed: () async {
+                            final confirm = await showDialog<bool>(
+                              context: context,
+                              builder: (context) => AlertDialog(
+                                title: const Text('Konfirmasi'),
+                                content: const Text(
+                                    'Apakah Anda yakin ingin menghapus tiket ini?'),
+                                actions: [
+                                  TextButton(
                                     onPressed: () =>
                                         Navigator.pop(context, false),
-                                    child: const Text('Batal')),
-                                TextButton(
+                                    child: const Text('Batal'),
+                                  ),
+                                  TextButton(
                                     onPressed: () =>
                                         Navigator.pop(context, true),
-                                    child: const Text('Hapus')),
-                              ],
-                            ),
-                          );
-
-                          if (confirm == true) {
-                            _deleteTicket(context);
-                          }
-                        },
-                        child: const Text('Hapus Tiket'),
-                      ),
-                    ],
-                  ),
-                  const Divider(height: 20),
-                  const Text(
-                    "Daftar Penumpang:",
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                  ),
-                  const SizedBox(height: 8),
-                  StreamBuilder<QuerySnapshot>(
-                    stream: FirebaseFirestore.instance
-                        .collection('booked_tickets')
-                        .where('ticketId', isEqualTo: ticketId)
-                        .snapshots(),
-                    builder: (context, passengerSnapshot) {
-                      if (passengerSnapshot.connectionState ==
-                          ConnectionState.waiting) {
-                        return const Center(child: CircularProgressIndicator());
-                      }
-
-                      if (!passengerSnapshot.hasData ||
-                          passengerSnapshot.data!.docs.isEmpty) {
-                        return const Text(
-                            "Belum ada penumpang yang terdaftar.");
-                      }
-
-                      final passengers = passengerSnapshot
-                          .data!.docs.first['passengers'] as List<dynamic>;
-                      // Mengakses data di luar passengers
-                      final paymentMethod =
-                          passengerSnapshot.data!.docs.first['paymentMethod'] ??
-                              'Tidak tersedia';
-                      final status =
-                          passengerSnapshot.data!.docs.first['status'] ??
-                              'Tidak tersedia';
-
-                      return ListView.builder(
-                        shrinkWrap: true,
-                        physics: const NeverScrollableScrollPhysics(),
-                        itemCount: passengers.length,
-                        itemBuilder: (context, index) {
-                          final passenger = passengers[index];
-
-                          // Mengakses data dalam passengers
-                          final firstName =
-                              passenger['firstName'] ?? 'Tidak tersedia';
-                          final lastName =
-                              passenger['lastName'] ?? 'Tidak tersedia';
-                          final birthDate =
-                              passenger['birthDate'] ?? 'Tidak tersedia';
-                          final nationality =
-                              passenger['nationality'] ?? 'Tidak tersedia';
-
-                          return Card(
-                            margin: const EdgeInsets.symmetric(
-                                vertical: 8, horizontal: 0),
-                            child: Padding(
-                              padding: const EdgeInsets.all(16.0),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    "$firstName $lastName",
-                                    style: const TextStyle(
-                                        fontSize: 16,
-                                        fontWeight: FontWeight.bold),
-                                  ),
-                                  const SizedBox(height: 2),
-                                  Text("Tanggal Lahir: $birthDate"),
-                                  Text("Kewarganegaraan: $nationality"),
-                                  const SizedBox(height: 8),
-                                  // Menampilkan data yang berada di luar passengers
-                                  Text("Metode Pembayaran: $paymentMethod"),
-                                  Text("Status: $status"),
-                                  const SizedBox(height: 8),
-                                  // Tombol Hapus Penumpang
-                                  ElevatedButton(
-                                    onPressed: () async {
-                                      final confirm = await showDialog<bool>(
-                                        context: context,
-                                        builder: (context) => AlertDialog(
-                                          title: const Text(
-                                              'Konfirmasi Hapus Penumpang'),
-                                          content: const Text(
-                                              'Apakah Anda yakin ingin menghapus penumpang ini?'),
-                                          actions: [
-                                            TextButton(
-                                                onPressed: () => Navigator.pop(
-                                                    context, false),
-                                                child: const Text('Batal')),
-                                            TextButton(
-                                                onPressed: () => Navigator.pop(
-                                                    context, true),
-                                                child: const Text('Hapus')),
-                                          ],
-                                        ),
-                                      );
-
-                                      if (confirm == true) {
-                                        _deletePassenger(
-                                            context, ticketId, index);
-                                      }
-                                    },
-                                    child: const Text('Hapus Penumpang'),
-                                    style: ElevatedButton.styleFrom(
-                                      backgroundColor: Colors
-                                          .white, // Warna merah untuk tombol hapus
-                                    ),
+                                    child: const Text('Hapus'),
                                   ),
                                 ],
                               ),
+                            );
+
+                            if (confirm == true) {
+                              _deleteTicket(context);
+                            }
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.redAccent,
+                            foregroundColor: Colors.white,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8),
                             ),
-                          );
-                        },
-                      );
-                    },
-                  )
-                ],
+                          ),
+                          child: const Text('Hapus Tiket'),
+                        ),
+                      ],
+                    ),
+                    const Divider(height: 20),
+                    const Text(
+                      "Daftar Penumpang:",
+                      style:
+                          TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                    ),
+                    const SizedBox(height: 8),
+                    StreamBuilder<QuerySnapshot>(
+                      stream: FirebaseFirestore.instance
+                          .collection('booked_tickets')
+                          .where('ticketId', isEqualTo: ticketId)
+                          .snapshots(),
+                      builder: (context, passengerSnapshot) {
+                        if (passengerSnapshot.connectionState ==
+                            ConnectionState.waiting) {
+                          return const Center(
+                              child: CircularProgressIndicator());
+                        }
+
+                        if (!passengerSnapshot.hasData ||
+                            passengerSnapshot.data!.docs.isEmpty) {
+                          return const Text(
+                              "Belum ada penumpang yang terdaftar.");
+                        }
+
+                        final passengers = passengerSnapshot
+                            .data!.docs.first['passengers'] as List<dynamic>;
+
+                        return ListView.builder(
+                          shrinkWrap: true,
+                          physics: const NeverScrollableScrollPhysics(),
+                          itemCount: passengers.length,
+                          itemBuilder: (context, index) {
+                            final passenger = passengers[index];
+                            return Card(
+                              margin: const EdgeInsets.symmetric(vertical: 8),
+                              child: ListTile(
+                                title: Text(
+                                  "${passenger['firstName']} ${passenger['lastName']}",
+                                  style: const TextStyle(
+                                      fontWeight: FontWeight.bold),
+                                ),
+                                subtitle: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                        "Tanggal Lahir: ${passenger['birthDate'] ?? 'Tidak tersedia'}"),
+                                    Text(
+                                        "Kewarganegaraan: ${passenger['nationality'] ?? 'Tidak tersedia'}"),
+                                  ],
+                                ),
+                                trailing: IconButton(
+                                  icon: const Icon(Icons.delete,
+                                      color: Colors.redAccent),
+                                  onPressed: () => _deletePassenger(
+                                      context, ticketId, index),
+                                ),
+                              ),
+                            );
+                          },
+                        );
+                      },
+                    )
+                  ],
+                ),
               ),
             ),
           );
         },
       ),
+    );
+  }
+
+  Widget _buildListTile({
+    required IconData icon,
+    required String title,
+    required String value,
+    TextStyle? valueStyle,
+  }) {
+    return Column(
+      children: [
+        ListTile(
+          leading: Icon(icon, color: Colors.blueAccent),
+          title: Text(
+            title,
+            style: const TextStyle(fontWeight: FontWeight.bold),
+          ),
+          subtitle: Text(value, style: valueStyle),
+        ),
+        Divider(thickness: 1.5, color: Colors.grey[300]),
+      ],
     );
   }
 }

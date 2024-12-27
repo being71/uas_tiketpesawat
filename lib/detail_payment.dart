@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 
 class DetailPaymentPage extends StatefulWidget {
   final Map<String, dynamic> ticket;
@@ -20,11 +19,6 @@ class _DetailPaymentPageState extends State<DetailPaymentPage> {
   String selectedPaymentMethod = 'Credit Card';
   final FirebaseFirestore firestore = FirebaseFirestore.instance;
 
-  Future<String?> _getUserId() async {
-    final user = FirebaseAuth.instance.currentUser;
-    return user?.uid;
-  }
-
   double calculateTotalPrice() {
     return widget.passengers.length *
         double.parse(widget.ticket['price'].toString());
@@ -32,15 +26,6 @@ class _DetailPaymentPageState extends State<DetailPaymentPage> {
 
   Future<void> _saveToFirebase() async {
     try {
-      // Ambil userId dari FirebaseAuth
-      final userId = await _getUserId();
-      if (userId == null || userId.isEmpty) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('User ID tidak ditemukan.')),
-        );
-        return;
-      }
-
       // Ambil ID tiket dari data yang dikirimkan
       final ticketId = widget.ticket['docId'];
       print('Ticket ID: $ticketId');
@@ -86,7 +71,6 @@ class _DetailPaymentPageState extends State<DetailPaymentPage> {
       // Simpan data pemesanan ke koleksi "booked_tickets"
       await firestore.collection('booked_tickets').add({
         'ticketId': ticketId,
-        'userId': userId,
         'passengers': widget.passengers,
         'paymentMethod': selectedPaymentMethod,
         'totalPrice': totalPrice,
