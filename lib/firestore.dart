@@ -1,3 +1,5 @@
+// ignore_for_file: equal_keys_in_map
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 

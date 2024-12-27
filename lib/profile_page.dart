@@ -3,6 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'home_screen_user.dart';
 import 'login.dart';
+import 'orderedticket.dart';
 
 class ProfilePage extends StatefulWidget {
   final String userId;
@@ -162,8 +163,8 @@ class _ProfilePageState extends State<ProfilePage> {
                     ],
                   ),
                 ),
+      // Bottom Navigation Bar
       bottomNavigationBar: BottomNavigationBar(
-        currentIndex: 2,
         items: const [
           BottomNavigationBarItem(
             icon: Icon(Icons.home),
@@ -180,10 +181,28 @@ class _ProfilePageState extends State<ProfilePage> {
         ],
         onTap: (index) {
           if (index == 0) {
+            // Navigasi ke halaman Home
             Navigator.pushReplacement(
               context,
               MaterialPageRoute(
                 builder: (context) => HomeScreenUser(userId: widget.userId),
+              ),
+            );
+          } else if (index == 1) {
+            // Navigasi ke halaman Pesanan
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(
+                builder: (context) =>
+                    OrderedTicketPage(userId: widget.userId), // Gunakan userId
+              ),
+            );
+          } else if (index == 2) {
+            // Tetap di halaman Profil
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(
+                builder: (context) => ProfilePage(userId: widget.userId),
               ),
             );
           }
