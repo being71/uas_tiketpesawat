@@ -79,6 +79,15 @@ class DetailTiketPage extends StatelessWidget {
                   subtitle: Text('${ticket['flightDuration'] ?? 0} menit'),
                 ),
                 ListTile(
+                  leading: Icon(Icons.timer, color: Colors.blueAccent),
+                  title: Text(
+                    'Bagasi',
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                  subtitle:
+                      Text('${ticket['baggageInfo'] ?? 'Tidak Tersedia'} kg'),
+                ),
+                ListTile(
                   leading:
                       Icon(Icons.monetization_on, color: Colors.blueAccent),
                   title: Text(

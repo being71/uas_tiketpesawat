@@ -55,6 +55,21 @@ class _CheckoutPageState extends State<CheckoutPage> {
     }
   }
 
+  Future<void> _selectDate(BuildContext context, int index) async {
+    final DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: DateTime.now(),
+      firstDate: DateTime(1900),
+      lastDate: DateTime.now(),
+    );
+    if (picked != null) {
+      setState(() {
+        passengers[index]['birthDate'] =
+            "${picked.day}-${picked.month}-${picked.year}";
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -165,56 +180,77 @@ class _CheckoutPageState extends State<CheckoutPage> {
                           ),
                           const Divider(),
                           TextFormField(
-                            decoration: const InputDecoration(
+                            decoration: InputDecoration(
                               labelText: 'Nama Depan',
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(8.0),
+                              ),
                             ),
                             onSaved: (value) =>
                                 passengers[index]['firstName'] = value ?? '',
                             validator: (value) {
                               if (value == null || value.isEmpty) {
                                 return 'Nama depan wajib diisi';
+                              } else if (!RegExp(r'^[a-zA-Z]+$')
+                                  .hasMatch(value)) {
+                                return 'Nama tidak boleh angka';
                               }
                               return null;
                             },
                           ),
                           const SizedBox(height: 8),
                           TextFormField(
-                            decoration: const InputDecoration(
+                            decoration: InputDecoration(
                               labelText: 'Nama Belakang',
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(8.0),
+                              ),
                             ),
                             onSaved: (value) =>
                                 passengers[index]['lastName'] = value ?? '',
                             validator: (value) {
                               if (value == null || value.isEmpty) {
                                 return 'Nama belakang wajib diisi';
+                              } else if (!RegExp(r'^[a-zA-Z]+$')
+                                  .hasMatch(value)) {
+                                return 'Nama tidak boleh angka';
                               }
                               return null;
                             },
                           ),
                           const SizedBox(height: 8),
-                          TextFormField(
-                            decoration: const InputDecoration(
-                              labelText: 'Tanggal Lahir',
+                          InkWell(
+                            onTap: () => _selectDate(context, index),
+                            child: InputDecorator(
+                              decoration: InputDecoration(
+                                labelText: 'Tanggal Lahir',
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(8.0),
+                                ),
+                              ),
+                              child: Text(
+                                passengers[index]['birthDate']!.isEmpty
+                                    ? 'Pilih Tanggal'
+                                    : passengers[index]['birthDate']!,
+                              ),
                             ),
-                            onSaved: (value) =>
-                                passengers[index]['birthDate'] = value ?? '',
-                            validator: (value) {
-                              if (value == null || value.isEmpty) {
-                                return 'Tanggal lahir wajib diisi';
-                              }
-                              return null;
-                            },
                           ),
                           const SizedBox(height: 8),
                           TextFormField(
-                            decoration: const InputDecoration(
+                            decoration: InputDecoration(
                               labelText: 'Kewarganegaraan',
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(8.0),
+                              ),
                             ),
                             onSaved: (value) =>
                                 passengers[index]['nationality'] = value ?? '',
                             validator: (value) {
                               if (value == null || value.isEmpty) {
                                 return 'Kewarganegaraan wajib diisi';
+                              } else if (!RegExp(r'^[a-zA-Z]+$')
+                                  .hasMatch(value)) {
+                                return 'Kewarganegaraan tidak boleh angka';
                               }
                               return null;
                             },
