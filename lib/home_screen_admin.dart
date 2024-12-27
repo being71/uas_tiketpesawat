@@ -31,7 +31,7 @@ class _HomeScreenAdminState extends State<HomeScreenAdmin> {
   Future<void> _calculateRevenue() async {
     // Query the bookings collection
     QuerySnapshot snapshot =
-        await FirebaseFirestore.instance.collection('bookings').get();
+        await FirebaseFirestore.instance.collection('booked_tickets').get();
 
     double total = 0;
     int soldTickets = 0;
