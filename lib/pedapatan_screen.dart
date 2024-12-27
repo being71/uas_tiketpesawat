@@ -25,21 +25,37 @@ class _PendapatanScreenState extends State<PendapatanScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Pendapatan'),
+        title: const Text(
+          'Pendapatan',
+          style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+        ),
+        backgroundColor: const Color.fromARGB(255, 73, 146, 255),
+        centerTitle: true,
+        elevation: 4,
       ),
       body: FutureBuilder<QuerySnapshot>(
         future: FirebaseFirestore.instance.collection('booked_tickets').get(),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
-            return Center(child: CircularProgressIndicator());
+            return const Center(child: CircularProgressIndicator());
           }
 
           if (snapshot.hasError) {
-            return Center(child: Text('Terjadi kesalahan: ${snapshot.error}'));
+            return Center(
+              child: Text(
+                'Terjadi kesalahan: ${snapshot.error}',
+                style: const TextStyle(fontSize: 16, color: Colors.red),
+              ),
+            );
           }
 
           if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-            return Center(child: Text('Data tidak ditemukan'));
+            return const Center(
+              child: Text(
+                'Data tidak ditemukan',
+                style: TextStyle(fontSize: 18, color: Colors.grey),
+              ),
+            );
           }
 
           // Hitung total pendapatan
@@ -49,93 +65,176 @@ class _PendapatanScreenState extends State<PendapatanScreen> {
             totalPendapatan += data['totalPrice'] ?? 0;
           });
 
-          return ListView.builder(
-            itemCount: snapshot.data!.docs.length +
-                1, // Menambah 1 untuk header total pendapatan
-            itemBuilder: (context, index) {
-              if (index == 0) {
-                // Menampilkan total pendapatan di atas daftar
-                return Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Text(
-                    'Total Pendapatan: Rp ${totalPendapatan.toStringAsFixed(0)}',
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                  ),
-                );
-              }
-
-              var data =
-                  snapshot.data!.docs[index - 1].data() as Map<String, dynamic>;
-              var bookingDate = (data['timestamp'] as Timestamp).toDate();
-              var totalPrice = data['totalPrice'];
-              var paymentMethod = data['paymentMethod'];
-              var userId = data['userId'];
-              var ticketId = data['ticketId'];
-              var passengers = data['passengers'] as List<dynamic>? ?? [];
-
-              // Format tanggal
-              String formattedDate =
-                  DateFormat('MMMM dd, yyyy').format(bookingDate);
-
-              return Card(
-                margin: EdgeInsets.symmetric(vertical: 8, horizontal: 16),
-                elevation: 4,
-                child: Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Tanggal Pemesanan: $formattedDate',
-                        style: TextStyle(fontSize: 16),
-                      ),
-                      SizedBox(height: 8),
-                      Text(
-                        'Total Harga: Rp $totalPrice',
-                        style: TextStyle(fontSize: 16),
-                      ),
-                      SizedBox(height: 8),
-                      Text(
-                        'Metode Pembayaran: $paymentMethod',
-                        style: TextStyle(fontSize: 16),
-                      ),
-                      SizedBox(height: 8),
-                      Text(
-                        'User ID: $userId',
-                        style: TextStyle(fontSize: 16),
-                      ),
-                      SizedBox(height: 8),
-                      Text(
-                        'ID Tiket: $ticketId',
-                        style: TextStyle(fontSize: 16),
-                      ),
-                      SizedBox(height: 16),
-                      Text(
-                        'Penumpang:',
-                        style: TextStyle(
-                            fontSize: 16, fontWeight: FontWeight.bold),
-                      ),
-                      ...passengers.map((passenger) {
-                        var passengerData =
-                            passenger as Map<String, dynamic>? ?? {};
-                        return Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 8.0),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                'Nama: ${passengerData['firstName']} ${passengerData['lastName']}',
-                                style: TextStyle(fontSize: 14),
-                              ),
-                            ],
-                          ),
-                        );
-                      }).toList(),
-                    ],
-                  ),
+          return Column(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(20.0),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.grey.withOpacity(0.2),
+                      blurRadius: 10,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
                 ),
-              );
-            },
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      'Detail Pendapatan',
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.blueAccent,
+                      ),
+                    ),
+                    const Divider(),
+                    Text(
+                      'Total Pendapatan: Rp ${totalPendapatan.toStringAsFixed(0)}',
+                      style: const TextStyle(
+                        fontSize: 22,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Expanded(
+                child: ListView.builder(
+                  padding: const EdgeInsets.symmetric(vertical: 10),
+                  itemCount: snapshot.data!.docs.length,
+                  itemBuilder: (context, index) {
+                    var data = snapshot.data!.docs[index].data()
+                        as Map<String, dynamic>;
+                    var bookingDate = (data['timestamp'] as Timestamp).toDate();
+                    var totalPrice = data['totalPrice'];
+                    var paymentMethod = data['paymentMethod'];
+                    var userId = data['userId'];
+                    var ticketId = data['ticketId'];
+                    var passengers = data['passengers'] as List<dynamic>? ?? [];
+
+                    // Format tanggal
+                    String formattedDate =
+                        DateFormat('MMMM dd, yyyy').format(bookingDate);
+
+                    return Card(
+                      margin: const EdgeInsets.symmetric(
+                          vertical: 10, horizontal: 16),
+                      elevation: 8,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(15),
+                      ),
+                      child: Padding(
+                        padding: const EdgeInsets.all(16.0),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Text(
+                              'Detail Tiket Pemesanan',
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.blueAccent,
+                              ),
+                            ),
+                            const Divider(),
+                            Row(
+                              children: [
+                                const Icon(Icons.date_range,
+                                    color: Colors.blueAccent),
+                                const SizedBox(width: 8),
+                                Text(
+                                  'Tanggal: $formattedDate',
+                                  style: const TextStyle(fontSize: 16),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 8),
+                            Row(
+                              children: [
+                                const Icon(Icons.attach_money,
+                                    color: Colors.blueAccent),
+                                const SizedBox(width: 8),
+                                Text(
+                                  'Total Harga: Rp $totalPrice',
+                                  style: const TextStyle(fontSize: 16),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 8),
+                            Row(
+                              children: [
+                                const Icon(Icons.payment,
+                                    color: Colors.blueAccent),
+                                const SizedBox(width: 8),
+                                Text(
+                                  'Metode Pembayaran: $paymentMethod',
+                                  style: const TextStyle(fontSize: 16),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 8),
+                            Row(
+                              children: [
+                                const Icon(Icons.person,
+                                    color: Colors.blueAccent),
+                                const SizedBox(width: 8),
+                                Text(
+                                  'User ID: $userId',
+                                  style: const TextStyle(fontSize: 16),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 8),
+                            Row(
+                              children: [
+                                const Icon(Icons.confirmation_number,
+                                    color: Colors.blueAccent),
+                                const SizedBox(width: 8),
+                                Text(
+                                  'ID Tiket: $ticketId',
+                                  style: const TextStyle(fontSize: 16),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 16),
+                            const Text(
+                              'Penumpang:',
+                              style: TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.blueAccent),
+                            ),
+                            ...passengers.map((passenger) {
+                              var passengerData =
+                                  passenger as Map<String, dynamic>? ?? {};
+                              return Padding(
+                                padding:
+                                    const EdgeInsets.symmetric(vertical: 4.0),
+                                child: Row(
+                                  children: [
+                                    const Icon(Icons.account_circle,
+                                        color: Colors.blueAccent),
+                                    const SizedBox(width: 8),
+                                    Text(
+                                      '${passengerData['firstName']} ${passengerData['lastName']}',
+                                      style: const TextStyle(fontSize: 14),
+                                    ),
+                                  ],
+                                ),
+                              );
+                            }).toList(),
+                          ],
+                        ),
+                      ),
+                    );
+                  },
+                ),
+              ),
+            ],
           );
         },
       ),
@@ -156,24 +255,24 @@ class _PendapatanScreenState extends State<PendapatanScreen> {
         },
         items: const [
           BottomNavigationBarItem(
-            icon: Icon(Icons.home, color: Colors.black),
+            icon: Icon(Icons.home),
             label: 'Home',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.confirmation_number, color: Colors.black),
+            icon: Icon(Icons.confirmation_number),
             label: 'Ticket',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.people, color: Colors.black),
+            icon: Icon(Icons.people),
             label: 'User',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.account_balance_wallet, color: Colors.black),
+            icon: Icon(Icons.account_balance_wallet),
             label: 'Pendapatan',
           ),
         ],
-        selectedItemColor: Colors.black,
-        unselectedItemColor: Colors.black,
+        selectedItemColor: Colors.indigo,
+        unselectedItemColor: Colors.grey,
       ),
     );
   }
